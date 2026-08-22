@@ -56,7 +56,7 @@ export const ProductItem: React.FC<Props> = ({
   }
 
   const itemPrice = variant?.priceInEUR || product.priceInEUR
-  const itemURL = `/products/${product.slug}${variant ? `?variant=${variant.id}` : ''}`
+  const itemURL = `/productos/${product.slug}${variant ? `?variant=${variant.id}` : ''}`
 
   return (
     <div className="flex items-center gap-4">

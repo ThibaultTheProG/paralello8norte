@@ -1,122 +1,129 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import type { Product } from '@/payload-types'
+import type { Product, VariantOption, VariantType } from '@/payload-types'
 
+import { ColorSwatch, SizeChip } from '@/components/p8'
+import { colorHex } from '@/components/p8/colorHex'
+import { axisOf } from '@/components/p8/variantAxes'
 import { createUrl } from '@/utilities/createUrl'
-import clsx from 'clsx'
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
+/**
+ * Sélecteur de variantes de la fiche produit.
+ *
+ * La logique est celle du template — l'état de la sélection vit dans les
+ * `searchParams`, ce qui permet à la galerie, à l'indicateur de stock et au
+ * bouton d'ajout de la lire sans état partagé. Seule la présentation est celle
+ * du design system : pastilles rondes pour la couleur, chips 44px pour la
+ * taille.
+ */
 export function VariantSelector({ product }: { product: Product }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const t = useTranslations('Producto')
+
   const variants = product.variants?.docs
   const variantTypes = product.variantTypes
-  const hasVariants = Boolean(product.enableVariants && variants?.length && variantTypes?.length)
 
-  if (!hasVariants) {
-    return null
-  }
+  if (!product.enableVariants || !variants?.length || !variantTypes?.length) return null
 
-  return variantTypes?.map((type) => {
-    if (!type || typeof type !== 'object') {
-      return <></>
-    }
+  return (
+    <div className="flex flex-col gap-[22px]">
+      {variantTypes.map((type) => {
+        if (typeof type !== 'object') return null
 
-    const options = type.options?.docs
+        const options = (type as VariantType).options?.docs?.filter(
+          (option): option is VariantOption => typeof option === 'object',
+        )
 
-    if (!options || !Array.isArray(options) || !options.length) {
-      return <></>
-    }
+        if (!options?.length) return null
 
-    return (
-      <dl className="" key={type.id}>
-        <dt className="mb-4 text-sm">{type.label}</dt>
-        <dd className="flex flex-wrap gap-3">
-          <React.Fragment>
-            {options?.map((option) => {
-              if (!option || typeof option !== 'object') {
-                return <></>
-              }
+        const axis = axisOf(type.name)
+        const selectedId = searchParams.get(type.name)
+        const selectedLabel = options.find((option) => String(option.id) === selectedId)?.label
 
-              const optionID = option.id
-              const optionKeyLowerCase = type.name
+        /**
+         * Reproduit l'URL telle qu'elle serait si l'option était choisie, et
+         * détermine au passage si la variante correspondante est en stock.
+         */
+        const resolve = (option: VariantOption) => {
+          const next = new URLSearchParams(searchParams.toString())
+          next.delete('variant')
+          next.delete('image')
+          next.set(type.name, String(option.id))
 
-              // Base option params on current params so we can preserve any other param state in the url.
-              const optionSearchParams = new URLSearchParams(searchParams.toString())
+          const currentOptions = Array.from(next.values())
 
-              // Remove image and variant ID from this search params so we can loop over it safely.
-              optionSearchParams.delete('variant')
-              optionSearchParams.delete('image')
+          const matchingVariant = variants
+            .filter((variant) => typeof variant === 'object')
+            .find((variant) =>
+              (variant.options ?? []).every((variantOption) =>
+                currentOptions.includes(
+                  String(typeof variantOption === 'object' ? variantOption.id : variantOption),
+                ),
+              ),
+            )
 
-              // Update the option params using the current option to reflect how the url *would* change,
-              // if the option was clicked.
-              optionSearchParams.set(optionKeyLowerCase, String(optionID))
+          if (matchingVariant) next.set('variant', String(matchingVariant.id))
 
-              const currentOptions = Array.from(optionSearchParams.values())
+          return {
+            available: matchingVariant ? (matchingVariant.inventory ?? 0) > 0 : true,
+            href: createUrl(pathname, next),
+          }
+        }
 
-              let isAvailableForSale = true
+        const go = (href: string) => router.replace(href, { scroll: false })
 
-              // Find a matching variant
-              if (variants) {
-                const matchingVariant = variants
-                  .filter((variant) => typeof variant === 'object')
-                  .find((variant) => {
-                    if (!variant.options || !Array.isArray(variant.options)) return false
+        return (
+          <div className="flex flex-col gap-[9px]" key={type.id}>
+            <div className="flex items-baseline justify-between">
+              <span className="text-meta text-ink font-bold">
+                {type.label}
+                {axis === 'color' && selectedLabel && (
+                  <span className="text-ink-muted font-medium">: {selectedLabel}</span>
+                )}
+              </span>
+              {axis === 'size' && (
+                // Pas de page « guía de tallas » pour l'instant : le lien est en
+                // place mais reste sur la fiche tant que la page n'existe pas.
+                <span className="text-meta text-blue-brand border-gold cursor-default border-b font-semibold">
+                  {t('guiaDeTallas')}
+                </span>
+              )}
+            </div>
 
-                    // Check if all variant options match the current options in the URL
-                    return variant.options.every((variantOption) => {
-                      if (typeof variantOption !== 'object')
-                        return currentOptions.includes(String(variantOption))
+            <div className="flex flex-wrap gap-2">
+              {options.map((option) => {
+                const { available, href } = resolve(option)
+                const selected = String(option.id) === selectedId
 
-                      return currentOptions.includes(String(variantOption.id))
-                    })
-                  })
-
-                if (matchingVariant) {
-                  // If we found a matching variant, set the variant ID in the search params.
-                  optionSearchParams.set('variant', String(matchingVariant.id))
-
-                  if (matchingVariant.inventory && matchingVariant.inventory > 0) {
-                    isAvailableForSale = true
-                  } else {
-                    isAvailableForSale = false
-                  }
-                }
-              }
-
-              const optionUrl = createUrl(pathname, optionSearchParams)
-
-              // The option is active if it's in the url params.
-              const isActive =
-                Boolean(isAvailableForSale) &&
-                searchParams.get(optionKeyLowerCase) === String(optionID)
-
-              return (
-                <Button
-                  variant={'ghost'}
-                  aria-disabled={!isAvailableForSale}
-                  className={clsx('px-2', {
-                    'bg-primary/5 text-primary': isActive,
-                  })}
-                  disabled={!isAvailableForSale}
-                  key={option.id}
-                  onClick={() => {
-                    router.replace(`${optionUrl}`, {
-                      scroll: false,
-                    })
-                  }}
-                  title={`${option.label} ${!isAvailableForSale ? ' (Out of Stock)' : ''}`}
-                >
-                  {option.label}
-                </Button>
-              )
-            })}
-          </React.Fragment>
-        </dd>
-      </dl>
-    )
-  })
+                return axis === 'color' ? (
+                  <ColorSwatch
+                    color={colorHex(option.value.toLowerCase())}
+                    key={option.id}
+                    name={option.label}
+                    onClick={() => go(href)}
+                    selected={selected}
+                    size={26}
+                  />
+                ) : (
+                  <SizeChip
+                    disabled={!available}
+                    key={option.id}
+                    label={option.label}
+                    onClick={() => go(href)}
+                    selected={selected}
+                    title={available ? option.label : `${option.label} — ${t('sinStock')}`}
+                  />
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }

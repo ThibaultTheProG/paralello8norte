@@ -1,15 +1,11 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import type { Address, Category, Product, Transaction, VariantOption } from '@/payload-types'
+import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest } from 'payload'
 
+import { CATEGORIES, COLORS, PRODUCTS, SIZES } from './catalog'
 import { contactFormData } from './contact-form'
 import { contactPageData } from './contact-page'
-import { productHatData } from './product-hat'
-import { productTshirtData, productTshirtVariant } from './product-tshirt'
 import { homePageData } from './home'
-import { imageHatData } from './image-hat'
-import { imageTshirtBlackData } from './image-tshirt-black'
-import { imageTshirtWhiteData } from './image-tshirt-white'
-import { imageHero1Data } from './image-hero-1'
-import { Address, Transaction, VariantOption } from '@/payload-types'
+import { richText } from './lexical'
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -27,51 +23,39 @@ const collections: CollectionSlug[] = [
   'orders',
 ]
 
-const categories = ['Accessories', 'T-Shirts', 'Hats']
-
-const sizeVariantOptions = [
-  { label: 'Small', value: 'small' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Large', value: 'large' },
-  { label: 'X Large', value: 'xlarge' },
-]
-
-const colorVariantOptions = [
-  { label: 'Black', value: 'black' },
-  { label: 'White', value: 'white' },
-]
-
 const globals: GlobalSlug[] = ['header', 'footer']
 
-const baseAddressUSData: Transaction['billingAddress'] = {
-  title: 'Dr.',
-  firstName: 'Otto',
-  lastName: 'Octavius',
-  phone: '1234567890',
-  company: 'Oscorp',
-  addressLine1: '123 Main St',
-  addressLine2: 'Suite 100',
-  city: 'New York',
-  state: 'NY',
-  postalCode: '10001',
-  country: 'US',
+/**
+ * Les produits sont mis en avant sur la page d'accueil dans cet ordre — ce sont
+ * les quatre pièces de la maquette.
+ */
+const FEATURED_SLUGS = ['hoodie-avila-2765', 'camiseta-no-joda', 'gorra-8-norte', 'tote-conoemadre']
+
+const addressES: Transaction['billingAddress'] = {
+  addressLine1: 'Carrer de Provença 214',
+  addressLine2: '3r 1a',
+  city: 'Barcelona',
+  country: 'ES',
+  firstName: 'Andreína',
+  lastName: 'Pérez',
+  phone: '+34600112233',
+  postalCode: '08036',
+  state: 'Barcelona',
+  title: 'Sra.',
 }
 
-const baseAddressUKData: Transaction['billingAddress'] = {
-  title: 'Mr.',
-  firstName: 'Oliver',
-  lastName: 'Twist',
-  phone: '1234567890',
-  addressLine1: '48 Great Portland St',
-  city: 'London',
-  postalCode: 'W1W 7ND',
-  country: 'GB',
+const addressFR: Transaction['billingAddress'] = {
+  addressLine1: '18 rue de la Verrerie',
+  city: 'Paris',
+  country: 'FR',
+  firstName: 'Andreína',
+  lastName: 'Pérez',
+  phone: '+33600112233',
+  postalCode: '75004',
+  title: 'Sra.',
 }
 
-// Next.js revalidation errors are normal when seeding the database without a server running
-// i.e. running `yarn seed` locally instead of using the admin UI within an active app
-// The app is not running to revalidate the pages and so the API routes are not available
-// These error messages can be ignored: `Error hitting revalidate route for...`
+// Les erreurs de revalidation Next sont normales quand le seed tourne sans serveur.
 export const seed = async ({
   payload,
   req,
@@ -80,25 +64,15 @@ export const seed = async ({
   req: PayloadRequest
 }): Promise<void> => {
   payload.logger.info('Seeding database...')
-
-  // we need to clear the media directory before seeding
-  // as well as the collections and globals
-  // this is because while `yarn seed` drops the database
-  // the custom `/api/seed` endpoint does not
   payload.logger.info(`— Clearing collections and globals...`)
 
-  // clear the database
   await Promise.all(
     globals.map((global) =>
       payload.updateGlobal({
         slug: global,
-        data: {
-          navItems: [],
-        },
+        context: { disableRevalidate: true },
+        data: { navItems: [] },
         depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
       }),
     ),
   )
@@ -110,200 +84,157 @@ export const seed = async ({
     }
   }
 
-  payload.logger.info(`— Seeding customer and customer data...`)
-
   await payload.delete({
     collection: 'users',
     depth: 0,
-    where: {
-      email: {
-        equals: 'customer@example.com',
+    where: { email: { equals: 'customer@example.com' } },
+  })
+
+  // `ensureFirstUserIsAdmin` promeut le premier compte créé : sans ce garde-fou,
+  // le client de démonstration deviendrait administrateur sur une base vide.
+  const existingUsers = await payload.find({ collection: 'users', depth: 0, limit: 0 })
+
+  if (existingUsers.totalDocs === 0) {
+    payload.logger.info(`— No user found, seeding an admin account...`)
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        name: 'Admin',
+        email: 'admin@paralelo8norte.com',
+        password: 'password',
+        roles: ['admin'],
       },
+    })
+  }
+
+  payload.logger.info(`— Seeding customer...`)
+
+  const customer = await payload.create({
+    collection: 'users',
+    data: {
+      name: 'Andreína Pérez',
+      email: 'customer@example.com',
+      password: 'password',
+      roles: ['customer'],
     },
   })
 
-  payload.logger.info(`— Seeding media...`)
+  payload.logger.info(`— Seeding categories...`)
 
-  const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, heroBuffer] =
-    await Promise.all([
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/hat-logo.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
-      ),
-      fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp',
-      ),
-    ])
+  const categories: Category[] = []
 
-  const [
-    customer,
-    imageHat,
-    imageTshirtBlack,
-    imageTshirtWhite,
-    imageHero,
-    accessoriesCategory,
-    tshirtsCategory,
-    hatsCategory,
-  ] = await Promise.all([
-    payload.create({
-      collection: 'users',
-      data: {
-        name: 'Customer',
-        email: 'customer@example.com',
-        password: 'password',
-        roles: ['customer'],
-      },
-    }),
-    payload.create({
-      collection: 'media',
-      data: imageHatData,
-      file: imageHatBuffer,
-    }),
-    payload.create({
-      collection: 'media',
-      data: imageTshirtBlackData,
-      file: imageTshirtBlackBuffer,
-    }),
-    payload.create({
-      collection: 'media',
-      data: imageTshirtWhiteData,
-      file: imageTshirtWhiteBuffer,
-    }),
-    payload.create({
-      collection: 'media',
-      data: imageHero1Data,
-      file: heroBuffer,
-    }),
-    ...categories.map((category) =>
-      payload.create({
+  for (const category of CATEGORIES) {
+    categories.push(
+      await payload.create({
         collection: 'categories',
-        data: {
-          title: category,
-          slug: category,
-        },
+        data: { slug: category.slug, title: category.title },
       }),
-    ),
-  ])
+    )
+  }
+
+  const categoryBySlug = new Map(categories.map((category) => [category.slug, category]))
 
   payload.logger.info(`— Seeding variant types and options...`)
 
-  const sizeVariantType = await payload.create({
+  // Les `name` (`talla`, `color`) sont les clés que la fiche produit met dans
+  // l'URL et que `src/components/p8/variantAxes.ts` reconnaît. Ne pas les renommer.
+  const sizeType = await payload.create({
     collection: 'variantTypes',
-    data: {
-      name: 'size',
-      label: 'Size',
-    },
+    data: { name: 'talla', label: 'Talla' },
   })
 
-  const sizeVariantOptionsResults: VariantOption[] = []
+  const colorType = await payload.create({
+    collection: 'variantTypes',
+    data: { name: 'color', label: 'Color' },
+  })
 
-  for (const option of sizeVariantOptions) {
-    const result = await payload.create({
-      collection: 'variantOptions',
+  const sizeOptions: VariantOption[] = []
+
+  for (const option of SIZES) {
+    sizeOptions.push(
+      await payload.create({
+        collection: 'variantOptions',
+        data: { ...option, variantType: sizeType.id },
+      }),
+    )
+  }
+
+  const colorOptions: VariantOption[] = []
+
+  for (const option of COLORS) {
+    colorOptions.push(
+      await payload.create({
+        collection: 'variantOptions',
+        data: { ...option, variantType: colorType.id },
+      }),
+    )
+  }
+
+  const sizeByValue = new Map(sizeOptions.map((option) => [option.value, option]))
+  const colorByValue = new Map(colorOptions.map((option) => [option.value, option]))
+
+  payload.logger.info(`— Seeding products and variants...`)
+
+  const products = new Map<string, Product>()
+
+  for (const seed of PRODUCTS) {
+    const category = categoryBySlug.get(seed.category)
+    const hasVariants = Boolean(seed.colors?.length && seed.sizes?.length)
+
+    const product = await payload.create({
+      collection: 'products',
+      depth: 0,
       data: {
-        ...option,
-        variantType: sizeVariantType.id,
+        _status: 'published',
+        categories: category ? [category.id] : [],
+        composition: seed.composition,
+        description: richText(seed.description),
+        enableVariants: hasVariants,
+        // Aucune photo n'a été fournie : la galerie reste vide et l'interface
+        // retombe sur la réserve #E9F0F4 légendée.
+        gallery: [],
+        inventory: hasVariants ? undefined : (seed.inventory ?? 0),
+        layout: [],
+        meta: { description: seed.description, title: `${seed.title} — Paralelo 8 Norte` },
+        priceInEUR: seed.price,
+        priceInEUREnabled: true,
+        reference: seed.reference,
+        slug: seed.slug,
+        title: seed.title,
+        universe: seed.universe,
+        ...(hasVariants ? { variantTypes: [colorType.id, sizeType.id] } : {}),
       },
     })
-    sizeVariantOptionsResults.push(result)
+
+    products.set(seed.slug, product)
+
+    if (!hasVariants) continue
+
+    for (const colorValue of seed.colors!) {
+      for (const sizeValue of seed.sizes!) {
+        const color = colorByValue.get(colorValue)
+        const size = sizeByValue.get(sizeValue)
+
+        if (!color || !size) continue
+
+        await payload.create({
+          collection: 'variants',
+          depth: 0,
+          data: {
+            _status: 'published',
+            inventory: seed.outOfStock?.includes(sizeValue) ? 0 : 24,
+            options: [color.id, size.id],
+            priceInEUR: seed.price,
+            priceInEUREnabled: true,
+            product: product.id,
+          },
+        })
+      }
+    }
   }
 
-  const [small, medium, large, xlarge] = sizeVariantOptionsResults
-
-  const colorVariantType = await payload.create({
-    collection: 'variantTypes',
-    data: {
-      name: 'color',
-      label: 'Color',
-    },
-  })
-
-  const [black, white] = await Promise.all(
-    colorVariantOptions.map((option) => {
-      return payload.create({
-        collection: 'variantOptions',
-        data: {
-          ...option,
-          variantType: colorVariantType.id,
-        },
-      })
-    }),
-  )
-
-  payload.logger.info(`— Seeding products...`)
-
-  const productHat = await payload.create({
-    collection: 'products',
-    depth: 0,
-    data: productHatData({
-      galleryImage: imageHat,
-      metaImage: imageHat,
-      variantTypes: [colorVariantType],
-      categories: [hatsCategory],
-      relatedProducts: [],
-    }),
-  })
-
-  const productTshirt = await payload.create({
-    collection: 'products',
-    depth: 0,
-    data: productTshirtData({
-      galleryImages: [
-        { image: imageTshirtBlack, variantOption: black },
-        { image: imageTshirtWhite, variantOption: white },
-      ],
-      metaImage: imageTshirtBlack,
-      contentImage: imageHero,
-      variantTypes: [colorVariantType, sizeVariantType],
-      categories: [tshirtsCategory],
-      relatedProducts: [productHat],
-    }),
-  })
-
-  let hoodieID: number | string = productTshirt.id
-
-  if (payload.db.defaultIDType === 'text') {
-    hoodieID = `"${hoodieID}"`
-  }
-
-  const [
-    smallTshirtHoodieVariant,
-    mediumTshirtHoodieVariant,
-    largeTshirtHoodieVariant,
-    xlargeTshirtHoodieVariant,
-  ] = await Promise.all(
-    [small, medium, large, xlarge].map((variantOption) =>
-      payload.create({
-        collection: 'variants',
-        depth: 0,
-        data: productTshirtVariant({
-          product: productTshirt,
-          variantOptions: [variantOption, white],
-        }),
-      }),
-    ),
-  )
-
-  await Promise.all(
-    [small, medium, large, xlarge].map((variantOption) =>
-      payload.create({
-        collection: 'variants',
-        depth: 0,
-        data: productTshirtVariant({
-          product: productTshirt,
-          variantOptions: [variantOption, black],
-          ...(variantOption.value === 'medium' ? { inventory: 0 } : {}),
-        }),
-      }),
-    ),
-  )
-
-  payload.logger.info(`— Seeding contact form...`)
+  payload.logger.info(`— Seeding pages...`)
 
   const contactForm = await payload.create({
     collection: 'forms',
@@ -311,193 +242,99 @@ export const seed = async ({
     data: contactFormData(),
   })
 
-  payload.logger.info(`— Seeding pages...`)
-
-  const [_, contactPage] = await Promise.all([
-    payload.create({
-      collection: 'pages',
-      depth: 0,
-      data: homePageData({
-        contentImage: imageHero,
-        metaImage: imageHat,
-      }),
-    }),
-    payload.create({
-      collection: 'pages',
-      depth: 0,
-      data: contactPageData({
-        contactForm: contactForm,
-      }),
-    }),
-  ])
-
-  payload.logger.info(`— Seeding addresses...`)
-
-  const customerUSAddress = await payload.create({
-    collection: 'addresses',
+  await payload.create({
+    collection: 'pages',
+    // Le hook `revalidatePage` appelle `revalidatePath`, qui n'existe pas hors
+    // d'une requête Next : le seed lancé en ligne de commande planterait.
+    context: { disableRevalidate: true },
     depth: 0,
-    data: {
-      customer: customer.id,
-      ...(baseAddressUSData as Address),
-    },
+    data: homePageData({
+      categories,
+      featured: FEATURED_SLUGS.map((slug) => products.get(slug)).filter(
+        (product): product is Product => Boolean(product),
+      ),
+    }),
   })
 
-  const customerUKAddress = await payload.create({
-    collection: 'addresses',
+  await payload.create({
+    collection: 'pages',
+    context: { disableRevalidate: true },
     depth: 0,
-    data: {
-      customer: customer.id,
-      ...(baseAddressUKData as Address),
-    },
+    data: contactPageData({ contactForm }),
   })
 
-  payload.logger.info(`— Seeding transactions...`)
+  payload.logger.info(`— Seeding addresses, transactions, carts and orders...`)
 
-  const pendingTransaction = await payload.create({
-    collection: 'transactions',
-    data: {
-      currency: 'EUR',
-      customer: customer.id,
-      paymentMethod: 'stripe',
-      stripe: {
-        customerID: 'cus_123',
-        paymentIntentID: 'pi_123',
-      },
-      status: 'pending',
-      billingAddress: baseAddressUSData,
-    },
+  await payload.create({
+    collection: 'addresses',
+    depth: 0,
+    data: { customer: customer.id, ...(addressES as Address) },
+  })
+
+  await payload.create({
+    collection: 'addresses',
+    depth: 0,
+    data: { customer: customer.id, ...(addressFR as Address) },
   })
 
   const succeededTransaction = await payload.create({
     collection: 'transactions',
     data: {
+      billingAddress: addressES,
       currency: 'EUR',
       customer: customer.id,
       paymentMethod: 'stripe',
-      stripe: {
-        customerID: 'cus_123',
-        paymentIntentID: 'pi_123',
-      },
       status: 'succeeded',
-      billingAddress: baseAddressUSData,
+      stripe: { customerID: 'cus_123', paymentIntentID: 'pi_123' },
     },
   })
 
-  let succeededTransactionID: number | string = succeededTransaction.id
+  const hoodie = products.get('hoodie-avila-2765')!
+  const gorra = products.get('gorra-8-norte')!
 
-  if (payload.db.defaultIDType === 'text') {
-    succeededTransactionID = `"${succeededTransactionID}"`
-  }
+  // Une variante du hoodie, pour que le panier et la commande portent une
+  // sélection taille + couleur comme en production.
+  const hoodieVariants = await payload.find({
+    collection: 'variants',
+    depth: 0,
+    limit: 1,
+    pagination: false,
+    where: { product: { equals: hoodie.id } },
+  })
 
-  payload.logger.info(`— Seeding carts...`)
+  const hoodieVariant = hoodieVariants.docs[0]
 
-  // This cart is open as it's created now
-  const openCart = await payload.create({
+  const cartItems = [
+    { product: hoodie.id, quantity: 1, ...(hoodieVariant ? { variant: hoodieVariant.id } : {}) },
+    { product: gorra.id, quantity: 1 },
+  ]
+
+  await payload.create({
     collection: 'carts',
-    data: {
-      customer: customer.id,
-      currency: 'EUR',
-      items: [
-        {
-          product: productTshirt.id,
-          variant: mediumTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-      ],
-    },
+    data: { currency: 'EUR', customer: customer.id, items: cartItems },
   })
 
-  const oldTimestamp = new Date('2023-01-01T00:00:00Z').toISOString()
-
-  // Cart is abandoned because it was created long in the past
-  const abandonedCart = await payload.create({
-    collection: 'carts',
-    data: {
-      currency: 'EUR',
-      createdAt: oldTimestamp,
-      items: [
-        {
-          product: productHat.id,
-          quantity: 1,
-        },
-      ],
-    },
-  })
-
-  // Cart is purchased because it has a purchasedAt date
-  const completedCart = await payload.create({
-    collection: 'carts',
-    data: {
-      customer: customer.id,
-      currency: 'EUR',
-      purchasedAt: new Date().toISOString(),
-      subtotal: 7499,
-      items: [
-        {
-          product: productTshirt.id,
-          variant: smallTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-        {
-          product: productTshirt.id,
-          variant: mediumTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-      ],
-    },
-  })
-
-  let completedCartID: number | string = completedCart.id
-
-  if (payload.db.defaultIDType === 'text') {
-    completedCartID = `"${completedCartID}"`
-  }
-
-  payload.logger.info(`— Seeding orders...`)
-
-  const orderInCompleted = await payload.create({
+  await payload.create({
     collection: 'orders',
     data: {
-      amount: 7499,
+      amount: 7000,
       currency: 'EUR',
       customer: customer.id,
-      shippingAddress: baseAddressUSData,
-      items: [
-        {
-          product: productTshirt.id,
-          variant: smallTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-        {
-          product: productTshirt.id,
-          variant: mediumTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-      ],
+      items: cartItems,
+      shippingAddress: addressES,
       status: 'completed',
       transactions: [succeededTransaction.id],
     },
   })
 
-  const orderInProcessing = await payload.create({
+  await payload.create({
     collection: 'orders',
     data: {
-      amount: 7499,
+      amount: 2500,
       currency: 'EUR',
       customer: customer.id,
-      shippingAddress: baseAddressUSData,
-      items: [
-        {
-          product: productTshirt.id,
-          variant: smallTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-        {
-          product: productTshirt.id,
-          variant: mediumTshirtHoodieVariant.id,
-          quantity: 1,
-        },
-      ],
+      items: [{ product: gorra.id, quantity: 1 }],
+      shippingAddress: addressFR,
       status: 'processing',
       transactions: [succeededTransaction.id],
     },
@@ -505,32 +342,16 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding globals...`)
 
+  // L'en-tête et le pied de page sont fixés par la maquette et rendus depuis
+  // next-intl ; ces entrées ne servent qu'au cas où un menu CMS soit rebranché.
   await Promise.all([
     payload.updateGlobal({
       slug: 'header',
       data: {
         navItems: [
-          {
-            link: {
-              type: 'custom',
-              label: 'Home',
-              url: '/',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Shop',
-              url: '/shop',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Account',
-              url: '/account',
-            },
-          },
+          { link: { type: 'custom', label: 'Inicio', url: '/' } },
+          { link: { type: 'custom', label: 'Catálogo', url: '/catalogo' } },
+          { link: { type: 'custom', label: 'Contacto', url: '/contacto' } },
         ],
       },
     }),
@@ -538,60 +359,13 @@ export const seed = async ({
       slug: 'footer',
       data: {
         navItems: [
-          {
-            link: {
-              type: 'custom',
-              label: 'Admin',
-              url: '/admin',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Find my order',
-              url: '/find-order',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/3.x/templates/website',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Payload',
-              newTab: true,
-              url: 'https://payloadcms.com/',
-            },
-          },
+          { link: { type: 'custom', label: 'Guía de tallas', url: '/contacto' } },
+          { link: { type: 'custom', label: 'Envíos y devoluciones', url: '/contacto' } },
+          { link: { type: 'custom', label: 'Buscar mi pedido', url: '/find-order' } },
         ],
       },
     }),
   ])
 
   payload.logger.info('Seeded database successfully!')
-}
-
-async function fetchFileByURL(url: string): Promise<File> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    method: 'GET',
-  })
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`)
-  }
-
-  const data = await res.arrayBuffer()
-
-  return {
-    name: url.split('/').pop() || `file-${Date.now()}`,
-    data: Buffer.from(data),
-    mimetype: `image/${url.split('.').pop()}`,
-    size: data.byteLength,
-  }
 }

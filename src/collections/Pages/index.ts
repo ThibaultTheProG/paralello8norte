@@ -2,8 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 import { Banner } from '@/blocks/Banner/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { AboutSplit } from '@/blocks/AboutSplit/config'
 import { CategoryGrid } from '@/blocks/CategoryGrid/config'
 import { P8Hero } from '@/blocks/P8Hero/config'
+import { ProductGrid } from '@/blocks/ProductGrid/config'
+import { UniverseGrid } from '@/blocks/UniverseGrid/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { adminOnly } from '@/access/adminOnly'
@@ -95,6 +98,9 @@ export const Pages: CollectionConfig = {
                 // Blocs Paralelo 8 Norte
                 P8Hero,
                 CategoryGrid,
+                ProductGrid,
+                UniverseGrid,
+                AboutSplit,
                 // Blocs hérités du template
                 CallToAction,
                 Content,

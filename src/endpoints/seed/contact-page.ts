@@ -1,57 +1,30 @@
 import type { Form } from '@/payload-types'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
-import { RequiredDataFromCollectionSlug } from 'payload'
+import { richText } from './lexical'
 
-type ProductArgs = {
-  contactForm: Form
-}
-
-export const contactPageData: (args: ProductArgs) => RequiredDataFromCollectionSlug<'pages'> = ({
+/** Le slug est `contacto` : c'est la route que vise la navigation de l'en-tête. */
+export const contactPageData = ({
   contactForm,
-}) => {
-  return {
-    slug: 'contact',
-    _status: 'published',
-    hero: {
-      type: 'none',
+}: {
+  contactForm: Form
+}): RequiredDataFromCollectionSlug<'pages'> => ({
+  slug: 'contacto',
+  _status: 'published',
+  hero: { type: 'none' },
+  layout: [
+    {
+      blockType: 'formBlock',
+      enableIntro: true,
+      form: contactForm,
+      introContent: richText(
+        'Escríbenos por lo que sea: una talla que no sabes cuál pedir, un pedido que se demoró, o una idea para un diseño. Contestamos de verdad.',
+      ),
     },
-    layout: [
-      {
-        blockType: 'formBlock',
-        enableIntro: true,
-        form: contactForm,
-        introContent: {
-          root: {
-            type: 'root',
-            children: [
-              {
-                type: 'heading',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Example contact form:',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                tag: 'h3',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            version: 1,
-          },
-        },
-      },
-    ],
-    title: 'Contact',
-  }
-}
+  ],
+  meta: {
+    description: 'Escríbenos: tallas, pedidos, ideas. Contestamos de verdad.',
+    title: 'Contacto — Paralelo 8 Norte',
+  },
+  title: 'Contacto',
+})

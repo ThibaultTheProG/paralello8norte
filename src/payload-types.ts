@@ -482,6 +482,9 @@ export interface Page {
   layout: (
     | P8HeroBlock
     | CategoryGridBlock
+    | ProductGridBlock
+    | UniverseGridBlock
+    | AboutSplitBlock
     | CallToActionBlock
     | ContentBlock
     | MediaBlock
@@ -560,6 +563,69 @@ export interface Category {
   slug: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock".
+ */
+export interface ProductGridBlock {
+  heading: string;
+  /**
+   * Sélection manuelle, ou remplissage automatique par les derniers produits publiés.
+   */
+  mode: 'manual' | 'latest';
+  products?: (number | Product)[] | null;
+  /**
+   * Facultatif : restreindre le remplissage à un univers.
+   */
+  universe?: ('naturaleza' | 'aventura' | 'cultura' | 'origen') | null;
+  /**
+   * La maquette en aligne 4 — un multiple de 4 garde la grille pleine.
+   */
+  limit?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UniverseGridBlock".
+ */
+export interface UniverseGridBlock {
+  heading: string;
+  subtitle?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'universeGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutSplitBlock".
+ */
+export interface AboutSplitBlock {
+  heading: string;
+  /**
+   * La maquette en compte deux.
+   */
+  paragraphs?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * En capitales. Laisser vide pour masquer le lien.
+   */
+  ctaLabel?: string | null;
+  ctaHref?: string | null;
+  imageSide?: ('left' | 'right') | null;
+  /**
+   * Légende de la réserve d’image, tant qu’aucune photo n’est fournie.
+   */
+  imageCaption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'aboutSplit';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1254,6 +1320,9 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         p8Hero?: T | P8HeroBlockSelect<T>;
         categoryGrid?: T | CategoryGridBlockSelect<T>;
+        productGrid?: T | ProductGridBlockSelect<T>;
+        universeGrid?: T | UniverseGridBlockSelect<T>;
+        aboutSplit?: T | AboutSplitBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -1297,6 +1366,48 @@ export interface P8HeroBlockSelect<T extends boolean = true> {
 export interface CategoryGridBlockSelect<T extends boolean = true> {
   heading?: T;
   categories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock_select".
+ */
+export interface ProductGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  mode?: T;
+  products?: T;
+  universe?: T;
+  limit?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UniverseGridBlock_select".
+ */
+export interface UniverseGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subtitle?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AboutSplitBlock_select".
+ */
+export interface AboutSplitBlockSelect<T extends boolean = true> {
+  heading?: T;
+  paragraphs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  ctaLabel?: T;
+  ctaHref?: T;
+  imageSide?: T;
+  imageCaption?: T;
   id?: T;
   blockName?: T;
 }

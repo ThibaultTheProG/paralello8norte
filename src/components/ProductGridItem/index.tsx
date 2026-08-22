@@ -33,7 +33,7 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
     gallery?.[0]?.image && typeof gallery[0]?.image !== 'string' ? gallery[0]?.image : false
 
   return (
-    <Link className="relative inline-block h-full w-full group" href={`/products/${product.slug}`}>
+    <Link className="relative inline-block h-full w-full group" href={`/productos/${product.slug}`}>
       {image ? (
         <Media
           className={clsx(

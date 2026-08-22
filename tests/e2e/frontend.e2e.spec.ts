@@ -112,7 +112,7 @@ test.describe('Frontend', () => {
   test('can view and sort via search page', async ({ page }) => {
     await page.goto(`${baseURL}/search`)
 
-    const productCard = page.locator(`a[href="/products/test-product"]`)
+    const productCard = page.locator(`a[href="/productos/test-product"]`)
     await productCard.waitFor({ state: 'visible' })
     await expect(productCard).toBeVisible()
 
@@ -306,8 +306,8 @@ test.describe('Frontend', () => {
     const publishChangesButton = page.getByRole('button', { name: 'Publish changes' })
     await publishChangesButton.click()
 
-    await page.goto(`${baseURL}/shop`)
-    const newProductCard = page.locator(`a[href="/products/new-product-with-variants"]`).first()
+    await page.goto(`${baseURL}/catalogo`)
+    const newProductCard = page.locator(`a[href="/productos/new-product-with-variants"]`).first()
     await newProductCard.waitFor({ state: 'visible' })
     await expect(newProductCard).toBeVisible()
   })
@@ -343,7 +343,7 @@ test.describe('Frontend', () => {
   })
 
   test('should disable add to cart when product has no inventory', async ({ page }) => {
-    await page.goto(`${baseURL}/products/no-inventory-product`)
+    await page.goto(`${baseURL}/productos/no-inventory-product`)
     const addToCartButton = page.getByRole('button', { name: 'Add to Cart' })
     await expect(addToCartButton).toBeDisabled()
   })
@@ -362,7 +362,7 @@ test.describe('Frontend', () => {
     await inventoryInput.fill('1')
     await saveAndConfirmSuccess(page)
 
-    await page.goto(`${baseURL}/products/no-inventory-product`)
+    await page.goto(`${baseURL}/productos/no-inventory-product`)
     const addToCartButton = page.getByRole('button', { name: 'Add to Cart' })
     await expect(addToCartButton).toBeVisible()
     await addToCartButton.click()
@@ -551,10 +551,10 @@ test.describe('Frontend', () => {
       variant?: string
     },
   ) {
-    await page.goto(`${baseURL}/shop`)
-    await expect(page).toHaveURL(/\/shop/)
+    await page.goto(`${baseURL}/catalogo`)
+    await expect(page).toHaveURL(/\/catalogo/)
 
-    const productCard = page.locator(`a[href="/products/${productSlug}"]`).first()
+    const productCard = page.locator(`a[href="/productos/${productSlug}"]`).first()
     await productCard.waitFor({ state: 'visible' })
     await productCard.click()
 

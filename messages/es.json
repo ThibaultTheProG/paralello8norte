@@ -55,6 +55,7 @@
   },
   "Producto": {
     "anadirAlCarrito": "AÑADIR AL CARRITO",
+    "anadido": "Añadido al carrito.",
     "anadirRapido": "AÑADIR RÁPIDO",
     "color": "Color",
     "talla": "Talla",
@@ -65,10 +66,12 @@
     "descripcion": "Descripción",
     "composicion": "Composición y cuidado",
     "enviosDevoluciones": "Envíos y devoluciones",
+    "enviosTexto": "Se imprime y se envía en 2 a 5 días hábiles. Envío a toda Europa. Si algo llega mal, escríbenos y lo resolvemos.",
     "delMismoUniverso": "Del mismo universo",
     "agotado": "Agotado",
     "sinStock": "Sin stock",
-    "enStock": "En stock"
+    "enStock": "En stock",
+    "quedanPocas": "Quedan {count} unidades"
   },
   "Carrito": {
     "titulo": "Tu carrito",

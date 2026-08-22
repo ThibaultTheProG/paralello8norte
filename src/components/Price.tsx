@@ -1,5 +1,6 @@
 'use client'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
+import { useLocale } from 'next-intl'
 import React, { useMemo } from 'react'
 
 type BaseProps = {
@@ -33,6 +34,9 @@ export const Price = ({
   as = 'p',
 }: Props & React.ComponentProps<'p'>) => {
   const { formatCurrency, supportedCurrencies } = useCurrency()
+  // Sans locale, le formatage retombe sur l'anglais et écrit « €45.00 » ;
+  // la marque chiffre en format européen, symbole après le nombre.
+  const locale = useLocale()
 
   const Element = as
 
@@ -46,7 +50,7 @@ export const Price = ({
   if (typeof amount === 'number') {
     return (
       <Element className={className} suppressHydrationWarning>
-        {formatCurrency(amount, { currency: currencyToUse })}
+        {formatCurrency(amount, { currency: currencyToUse, locale })}
       </Element>
     )
   }
@@ -54,7 +58,7 @@ export const Price = ({
   if (highestAmount && highestAmount !== lowestAmount) {
     return (
       <Element className={className} suppressHydrationWarning>
-        {`${formatCurrency(lowestAmount, { currency: currencyToUse })} - ${formatCurrency(highestAmount, { currency: currencyToUse })}`}
+        {`${formatCurrency(lowestAmount, { currency: currencyToUse, locale })} - ${formatCurrency(highestAmount, { currency: currencyToUse, locale })}`}
       </Element>
     )
   }
@@ -62,7 +66,7 @@ export const Price = ({
   if (lowestAmount) {
     return (
       <Element className={className} suppressHydrationWarning>
-        {`${formatCurrency(lowestAmount, { currency: currencyToUse })}`}
+        {`${formatCurrency(lowestAmount, { currency: currencyToUse, locale })}`}
       </Element>
     )
   }

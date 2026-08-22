@@ -1,82 +1,50 @@
-'use client'
-
 import type { Media as MediaType, Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
-import { GridTileImage } from '@/components/Grid/tile'
-import { useSearchParams } from 'next/navigation'
-import React, { useEffect } from 'react'
-
-import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
-import { DefaultDocumentIDType } from 'payload'
+import { ImagePlaceholder } from '@/components/p8'
+import { getTranslations } from 'next-intl/server'
+import React from 'react'
 
 type Props = {
   gallery: NonNullable<Product['gallery']>
+  title: string
 }
 
-export const Gallery: React.FC<Props> = ({ gallery }) => {
-  const searchParams = useSearchParams()
-  const [current, setCurrent] = React.useState(0)
-  const [api, setApi] = React.useState<CarouselApi>()
+/** Le carrousel du template est remplacé par la colonne empilée de la maquette : trois visuels 4/5 qui défilent contre la colonne d'achat restée fixe. */
+const PLACEHOLDER_COUNT = 3
 
-  useEffect(() => {
-    if (!api) {
-      return
-    }
-  }, [api])
+export const Gallery: React.FC<Props> = async ({ gallery, title }) => {
+  const t = await getTranslations('Comun')
 
-  useEffect(() => {
-    const values = Array.from(searchParams.values())
+  const images = gallery
+    .map((item) => item.image)
+    .filter((image): image is MediaType => Boolean(image) && typeof image === 'object')
 
-    if (values && api) {
-      const index = gallery.findIndex((item) => {
-        if (!item.variantOption) return false
-
-        let variantID: DefaultDocumentIDType
-
-        if (typeof item.variantOption === 'object') {
-          variantID = item.variantOption.id
-        } else variantID = item.variantOption
-
-        return Boolean(values.find((value) => value === String(variantID)))
-      })
-      if (index !== -1) {
-        setCurrent(index)
-        api.scrollTo(index, true)
-      }
-    }
-  }, [searchParams, api, gallery])
+  if (!images.length) {
+    return (
+      <div className="flex flex-col gap-[18px]">
+        {Array.from({ length: PLACEHOLDER_COUNT }).map((_, index) => (
+          <div className="relative aspect-[4/5] w-full" key={index}>
+            <ImagePlaceholder label={index === 0 ? title : t('imagenPendiente')} />
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <div className="relative w-full overflow-hidden mb-8">
-        <Media
-          resource={gallery[current]?.image ?? undefined}
-          className="w-full"
-          imgClassName="w-full rounded-lg"
-        />
-      </div>
-
-      <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
-        <CarouselContent>
-          {gallery.map((item, i) => {
-            const image = item.image
-            // `typeof null === 'object'`, d'où le garde explicite : la galerie peut
-            // désormais contenir des entrées sans image.
-            if (!image || typeof image !== 'object') return null
-
-            return (
-              <CarouselItem
-                className="basis-1/5"
-                key={`${image.id}-${i}`}
-                onClick={() => setCurrent(i)}
-              >
-                <GridTileImage active={i === current} media={image} />
-              </CarouselItem>
-            )
-          })}
-        </CarouselContent>
-      </Carousel>
+    <div className="flex flex-col gap-[18px]">
+      {images.map((image, index) => (
+        <div className="relative aspect-[4/5] w-full overflow-hidden" key={image.id}>
+          <Media
+            className="h-full w-full"
+            fill
+            imgClassName="object-cover"
+            priority={index === 0}
+            resource={image}
+          />
+        </div>
+      ))}
     </div>
   )
 }

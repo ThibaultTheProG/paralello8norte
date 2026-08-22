@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/providers/Auth'
+import { EUR } from '@payloadcms/plugin-ecommerce'
 import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
 import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import React from 'react'
@@ -16,6 +17,13 @@ export const Providers: React.FC<{
         <HeaderThemeProvider>
           <SonnerProvider />
           <EcommerceProvider
+            /* Sans cette configuration, le contexte client retombe sur le dollar
+               et affiche « $45.00 » là où la marque chiffre en euros. Elle doit
+               rester alignée sur `currencies` dans `src/plugins/index.ts`. */
+            currenciesConfig={{
+              defaultCurrency: 'EUR',
+              supportedCurrencies: [EUR],
+            }}
             enableVariants={true}
             api={{
               cartsFetchQuery: {

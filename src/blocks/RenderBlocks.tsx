@@ -1,3 +1,4 @@
+import { AboutSplitComponent } from '@/blocks/AboutSplit/Component'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -5,6 +6,8 @@ import { CarouselBlock } from '@/blocks/Carousel/Component'
 import { CategoryGridComponent } from '@/blocks/CategoryGrid/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { P8HeroComponent } from '@/blocks/P8Hero/Component'
+import { ProductGridComponent } from '@/blocks/ProductGrid/Component'
+import { UniverseGridComponent } from '@/blocks/UniverseGrid/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
@@ -14,6 +17,7 @@ import React, { Fragment } from 'react'
 import type { Page } from '../payload-types'
 
 const blockComponents = {
+  aboutSplit: AboutSplitComponent,
   archive: ArchiveBlock,
   banner: BannerBlock,
   carousel: CarouselBlock,
@@ -23,6 +27,8 @@ const blockComponents = {
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
   p8Hero: P8HeroComponent,
+  productGrid: ProductGridComponent,
+  universeGrid: UniverseGridComponent,
   threeItemGrid: ThreeItemGridBlock,
 }
 
@@ -31,7 +37,13 @@ const blockComponents = {
  * entre sections, et le hero est pleine largeur) : ils ne doivent pas hériter de
  * la marge `my-16` appliquée aux blocs du template.
  */
-const selfSpacedBlocks = new Set(['categoryGrid', 'p8Hero'])
+const selfSpacedBlocks = new Set([
+  'aboutSplit',
+  'categoryGrid',
+  'p8Hero',
+  'productGrid',
+  'universeGrid',
+])
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
