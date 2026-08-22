@@ -1,8 +1,6 @@
 'use client'
 
-import type { Header } from '@/payload-types'
-
-import { CMSLink } from '@/components/Link'
+import { Wordmark } from '@/components/p8'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -12,30 +10,30 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { Link, usePathname } from '@/i18n/navigation'
 import { useAuth } from '@/providers/Auth'
 import { MenuIcon } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
+import { LocaleSwitcher } from './LocaleSwitcher'
+
 interface Props {
-  menu: Header['navItems']
+  links: { href: string; label: string }[]
 }
 
-export function MobileMenu({ menu }: Props) {
+export function MobileMenu({ links }: Props) {
   const { user } = useAuth()
+  const t = useTranslations()
 
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
 
-  const closeMobileMenu = () => setIsOpen(false)
-
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setIsOpen(false)
-      }
+      if (window.innerWidth > 768) setIsOpen(false)
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -47,64 +45,69 @@ export function MobileMenu({ menu }: Props) {
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
-      <SheetTrigger className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:bg-black dark:text-white">
-        <MenuIcon className="h-4" />
+      <SheetTrigger
+        aria-label={t('Nav.menu')}
+        className="text-ink flex h-9 w-9 items-center justify-center"
+      >
+        <MenuIcon className="size-[18px]" strokeWidth={1.8} />
       </SheetTrigger>
 
-      <SheetContent side="left" className="px-4">
+      <SheetContent className="px-[18px]" side="left">
         <SheetHeader className="px-0 pt-4 pb-0">
-          <SheetTitle>My Store</SheetTitle>
-
-          <SheetDescription />
+          <SheetTitle asChild>
+            <span>
+              <Wordmark size="sm" />
+            </span>
+          </SheetTitle>
+          <SheetDescription className="sr-only">{t('Nav.menu')}</SheetDescription>
         </SheetHeader>
 
-        <div className="py-4">
-          {menu?.length ? (
-            <ul className="flex w-full flex-col">
-              {menu.map((item) => (
-                <li className="py-2" key={item.id}>
-                  <CMSLink {...item.link} appearance="link" />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
+        <nav className="py-6">
+          <ul className="flex w-full flex-col gap-4">
+            {links.map((link) => (
+              <li key={link.href}>
+                <Link className="text-h2-sm text-ink font-extrabold" href={link.href}>
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-        {user ? (
-          <div className="mt-4">
-            <h2 className="text-xl mb-4">My account</h2>
-            <hr className="my-2" />
-            <ul className="flex flex-col gap-2">
+        <div className="border-hairline border-t pt-6">
+          {user ? (
+            <ul className="text-ui text-ink-body flex flex-col gap-3">
               <li>
-                <Link href="/orders">Orders</Link>
+                <Link href="/orders">{t('Cuenta.pedidos')}</Link>
               </li>
               <li>
-                <Link href="/account/addresses">Addresses</Link>
+                <Link href="/account/addresses">{t('Cuenta.direcciones')}</Link>
               </li>
               <li>
-                <Link href="/account">Manage account</Link>
+                <Link href="/account">{t('Cuenta.ajustes')}</Link>
               </li>
-              <li className="mt-6">
-                <Button asChild variant="outline">
-                  <Link href="/logout">Log out</Link>
+              <li className="mt-4">
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/logout">{t('Cuenta.cerrarSesion')}</Link>
                 </Button>
               </li>
             </ul>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-xl mb-4">My account</h2>
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Button asChild className="w-full sm:flex-1" variant="outline">
-                <Link href="/login">Log in</Link>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Button asChild size="sm" variant="outline">
+                <Link href="/login">{t('Auth.iniciarSesion')}</Link>
               </Button>
-              <span className="text-center text-sm text-muted-foreground sm:text-base">or</span>
-              <Button asChild className="w-full sm:flex-1">
-                <Link href="/create-account">Create an account</Link>
+              <Button asChild size="sm">
+                <Link href="/create-account">{t('Auth.crearCuenta')}</Link>
               </Button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="border-hairline mt-6 flex items-center justify-between border-t pt-6">
+          <LocaleSwitcher />
+          <span className="text-meta text-ink font-semibold">EUR ▾</span>
+        </div>
       </SheetContent>
     </Sheet>
   )

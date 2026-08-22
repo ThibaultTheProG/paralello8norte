@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { Banner } from '@/blocks/Banner/config'
 import { Carousel } from '@/blocks/Carousel/config'
+import { CategoryGrid } from '@/blocks/CategoryGrid/config'
+import { P8Hero } from '@/blocks/P8Hero/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { adminOnly } from '@/access/adminOnly'
@@ -53,6 +55,7 @@ export const Pages: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
       required: true,
     },
     {
@@ -87,7 +90,12 @@ export const Pages: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
+              localized: true,
               blocks: [
+                // Blocs Paralelo 8 Norte
+                P8Hero,
+                CategoryGrid,
+                // Blocs hérités du template
                 CallToAction,
                 Content,
                 MediaBlock,

@@ -31,6 +31,7 @@ export const productTshirtData: (
         'Top off your look with our classic Tshirt, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
     },
     _status: 'published',
+    universe: 'cultura',
     layout: [
       {
         blockType: 'mediaBlock',
@@ -1169,8 +1170,8 @@ export const productTshirtData: (
     gallery: galleryImages,
     title: 'Tshirt',
     slug: 'tshirt',
-    priceInUSDEnabled: true,
-    priceInUSD: 4999,
+    priceInEUREnabled: true,
+    priceInEUR: 4999,
     relatedProducts: relatedProducts,
   }
 }
@@ -1179,7 +1180,7 @@ type ProductVariantArgs = {
   product: Product
   variantOptions: VariantOption[]
   inventory?: number
-  priceInUSD?: number
+  priceInEUR?: number
 }
 
 export const productTshirtVariant: (
@@ -1188,14 +1189,14 @@ export const productTshirtVariant: (
   product,
   variantOptions,
   inventory = 492,
-  priceInUSD = 4999,
+  priceInEUR = 4999,
 }) => {
   return {
     product: product,
     options: variantOptions,
     inventory,
-    priceInUSDEnabled: true,
-    priceInUSD,
+    priceInEUREnabled: true,
+    priceInEUR,
     _status: 'published',
   }
 }

@@ -51,7 +51,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     <div>
       <div className="relative w-full overflow-hidden mb-8">
         <Media
-          resource={gallery[current].image}
+          resource={gallery[current]?.image ?? undefined}
           className="w-full"
           imgClassName="w-full rounded-lg"
         />
@@ -60,15 +60,18 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
           {gallery.map((item, i) => {
-            if (typeof item.image !== 'object') return null
+            const image = item.image
+            // `typeof null === 'object'`, d'où le garde explicite : la galerie peut
+            // désormais contenir des entrées sans image.
+            if (!image || typeof image !== 'object') return null
 
             return (
               <CarouselItem
                 className="basis-1/5"
-                key={`${item.image.id}-${i}`}
+                key={`${image.id}-${i}`}
                 onClick={() => setCurrent(i)}
               >
-                <GridTileImage active={i === current} media={item.image} />
+                <GridTileImage active={i === current} media={image} />
               </CarouselItem>
             )
           })}

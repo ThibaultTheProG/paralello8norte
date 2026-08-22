@@ -1,6 +1,6 @@
 import type { Product, Variant } from '@/payload-types'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 import clsx from 'clsx'
 import { Media } from '@/components/Media'
@@ -11,9 +11,9 @@ type Props = {
 }
 
 export const ProductGridItem: React.FC<Props> = ({ product }) => {
-  const { gallery, priceInUSD, title } = product
+  const { gallery, priceInEUR, title } = product
 
-  let price = priceInUSD
+  let price = priceInEUR
 
   const variants = product.variants?.docs
 
@@ -22,10 +22,10 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
     if (
       variant &&
       typeof variant === 'object' &&
-      variant?.priceInUSD &&
-      typeof variant.priceInUSD === 'number'
+      variant?.priceInEUR &&
+      typeof variant.priceInEUR === 'number'
     ) {
-      price = variant.priceInUSD
+      price = variant.priceInEUR
     }
   }
 

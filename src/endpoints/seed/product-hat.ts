@@ -25,6 +25,7 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
         'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
     },
     _status: 'published',
+    universe: 'origen',
     layout: [],
     categories: categories,
     description: {
@@ -61,8 +62,8 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
     gallery: [{ image: galleryImage }],
     title: 'Hat',
     slug: 'hat',
-    priceInUSDEnabled: true,
-    priceInUSD: 2500,
+    priceInEUREnabled: true,
+    priceInEUR: 2500,
     relatedProducts: relatedProducts,
   }
 }

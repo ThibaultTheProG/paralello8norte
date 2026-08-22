@@ -1,66 +1,83 @@
 'use client'
-import { CMSLink } from '@/components/Link'
+
 import { Cart } from '@/components/Cart'
 import { OpenCartButton } from '@/components/Cart/OpenCart'
-import Link from 'next/link'
+import { Wordmark } from '@/components/p8'
+import { Link, usePathname } from '@/i18n/navigation'
+import { cn } from '@/utilities/cn'
+import { Search, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React, { Suspense } from 'react'
 
+import { LocaleSwitcher } from './LocaleSwitcher'
 import { MobileMenu } from './MobileMenu'
-import type { Header } from 'src/payload-types'
 
-import { LogoIcon } from '@/components/icons/logo'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/utilities/cn'
-
-type Props = {
-  header: Header
-}
-
-export function HeaderClient({ header }: Props) {
-  const menu = header.navItems || []
+/**
+ * En-tête unique du site : fond blanc, filet gris de 1px en bas, lien actif en
+ * bleu souligné 2px. Les icônes sont des tracés de 1.8 sans remplissage
+ * (substitution Lucide validée par le design system).
+ */
+export function HeaderClient() {
+  const t = useTranslations('Nav')
   const pathname = usePathname()
 
-  return (
-    <div className="relative z-20 border-b">
-      <nav className="flex items-center md:items-end justify-between container pt-2">
-        <div className="block flex-none md:hidden">
-          <Suspense fallback={null}>
-            <MobileMenu menu={menu} />
-          </Suspense>
-        </div>
-        <div className="flex w-full items-end justify-between">
-          <div className="flex w-full items-end gap-6 md:w-1/3">
-            <Link className="flex w-full items-center justify-center pt-4 pb-4 md:w-auto" href="/">
-              <LogoIcon className="w-6 h-auto" />
-            </Link>
-            {menu.length ? (
-              <ul className="hidden gap-4 text-sm md:flex md:items-center">
-                {menu.map((item) => (
-                  <li key={item.id}>
-                    <CMSLink
-                      {...item.link}
-                      size={'clear'}
-                      className={cn('relative navLink', {
-                        active:
-                          item.link.url && item.link.url !== '/'
-                            ? pathname.includes(item.link.url)
-                            : false,
-                      })}
-                      appearance="nav"
-                    />
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+  const links = [
+    { href: '/', label: t('inicio') },
+    { href: '/catalogo', label: t('catalogo') },
+    { href: '/contacto', label: t('contacto') },
+  ]
 
-          <div className="flex justify-end md:w-1/3 gap-4">
-            <Suspense fallback={<OpenCartButton />}>
-              <Cart />
+  const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href))
+
+  return (
+    <header className="border-hairline bg-white border-b">
+      <div className="container flex items-center justify-between py-[18px]">
+        <div className="flex items-center gap-4">
+          <div className="md:hidden">
+            <Suspense fallback={null}>
+              <MobileMenu links={links} />
             </Suspense>
           </div>
+          <Link aria-label="Paralelo 8 Norte" href="/">
+            <Wordmark />
+          </Link>
         </div>
-      </nav>
-    </div>
+
+        <nav className="text-ui text-ink hidden gap-9 font-semibold md:flex">
+          {links.map((link) => (
+            <Link
+              className={cn(
+                'transition-colors duration-[120ms]',
+                isActive(link.href)
+                  ? 'text-blue-brand border-blue-brand border-b-2 pb-[3px]'
+                  : 'hover:text-blue-brand',
+              )}
+              href={link.href}
+              key={link.href}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="text-meta text-ink flex items-center gap-[22px]">
+          <div className="hidden sm:block">
+            <LocaleSwitcher />
+          </div>
+          <span className="hidden font-semibold sm:inline">EUR ▾</span>
+
+          <Link aria-label={t('buscar')} href="/catalogo">
+            <Search className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]" strokeWidth={1.8} />
+          </Link>
+          <Link aria-label={t('cuenta')} href="/account">
+            <User className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]" strokeWidth={1.8} />
+          </Link>
+
+          <Suspense fallback={<OpenCartButton />}>
+            <Cart />
+          </Suspense>
+        </div>
+      </div>
+    </header>
   )
 }

@@ -40,9 +40,19 @@ export default buildConfig({
   collections: [Users, Pages, Categories, Media],
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      // The preproduction Neon branch is the working database for this phase.
+      connectionString: process.env.PREPROD_DATABASE_URL || process.env.DATABASE_URL || '',
     },
   }),
+  localization: {
+    defaultLocale: 'es',
+    fallback: true,
+    locales: [
+      { code: 'es', label: 'Español' },
+      { code: 'en', label: 'English' },
+      { code: 'fr', label: 'Français' },
+    ],
+  },
   editor: lexicalEditor({
     features: () => {
       return [

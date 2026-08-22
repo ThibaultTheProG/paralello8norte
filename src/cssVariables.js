@@ -1,4 +1,9 @@
-// Keep these in sync with the CSS variables in the `_css` directory
+// Miroir JS des tokens de src/styles/p8-tokens.css.
+//
+// Les iframes Stripe Elements ne peuvent pas lire les variables CSS de la page :
+// l'Appearance API n'accepte que des valeurs littérales. C'est la seule raison
+// d'être de ce fichier — le tenir synchronisé avec les tokens à chaque évolution
+// de la palette.
 
 export const cssVariables = {
   breakpoints: {
@@ -7,11 +12,15 @@ export const cssVariables = {
     s: 768,
   },
   colors: {
-    base0: 'rgb(255, 255, 255)',
-    base100: 'rgb(235, 235, 235)',
-    base500: 'rgb(128, 128, 128)',
-    base850: 'rgb(34, 34, 34)',
-    base1000: 'rgb(0, 0, 0)',
-    error500: 'rgb(255, 111, 118)',
+    blue500: '#00A0DD',
+    blue600: '#0E7FB0',
+    gold500: '#C9A227',
+    ink900: '#10131A',
+    ink700: '#3C424D',
+    ink500: '#8A919B',
+    ink300: '#B9BEC6',
+    line300: '#D8DCE1',
+    white: '#FFFFFF',
+    error: '#B4232B',
   },
 }

@@ -1,0 +1,170 @@
+/* ---------------------------------------------------------------------------
+ * Paralelo 8 Norte — tokens de marque
+ *
+ * Copie verbatim de paralelo8-design-system/tokens/{colors,typography,spacing,
+ * elevation}.css. Ce fichier est un miroir : ne pas y inventer de valeur, et le
+ * resynchroniser si le design system évolue.
+ *
+ * Consommer les alias sémantiques (--text-body, --surface-accent,
+ * --action-primary-bg…) plutôt que les --p8-* bruts.
+ * ------------------------------------------------------------------------- */
+
+/* --- colors.css --- */
+:root {
+  /* Base — Caribe (variante A) */
+  --p8-blue-500: #00a0dd; /* accent principal, CTA, liens actifs */
+  --p8-blue-600: #0e7fb0; /* hero, aplats profonds */
+  --p8-blue-400: #22a5d8; /* haut du dégradé hero */
+  --p8-navy-900: #1e2f45; /* wordmark */
+  --p8-gold-500: #c9a227; /* micro-accent, rubriques, filets */
+  --p8-gold-200: #ffdf7e; /* mot manuscrit sur fond sombre */
+  --p8-gold-050: #fcf9f0; /* fond encart « la referencia » */
+
+  --p8-ink-900: #10131a; /* texte principal */
+  --p8-ink-700: #3c424d; /* texte courant */
+  --p8-ink-500: #8a919b; /* texte secondaire */
+  --p8-ink-400: #7c8b96; /* labels sur aplat clair */
+  --p8-ink-300: #b9bec6; /* désactivé */
+
+  --p8-white: #ffffff;
+  --p8-sand-050: #edebe6; /* fond de planche / desk */
+  --p8-line-200: #e7e9ec; /* filets fins (header, accordéons) */
+  --p8-line-300: #d8dce1; /* bordures de contrôles */
+  --p8-line-400: #c2c8cf; /* bordures cases à cocher */
+  --p8-line-footer: #eceae5; /* séparateurs du pied de page */
+  --p8-mist-100: #e9f0f4; /* réserve image / placeholder */
+  --p8-mist-200: #dce6ec; /* réserve image, 2e visuel */
+
+  /* Sémantique */
+  --text-strong: var(--p8-ink-900);
+  --text-body: var(--p8-ink-700);
+  --text-muted: var(--p8-ink-500);
+  --text-on-accent: var(--p8-white);
+  --text-eyebrow: var(--p8-gold-500);
+
+  --surface-page: var(--p8-white);
+  --surface-header: var(--p8-white);
+  --surface-footer: var(--p8-white);
+  --surface-accent: var(--p8-blue-500);
+  --surface-hero: var(--p8-blue-600);
+  --surface-image: var(--p8-mist-100);
+  --surface-note: var(--p8-gold-050);
+
+  --border-hairline: var(--p8-line-200);
+  --border-control: var(--p8-line-300);
+  --border-footer: var(--p8-line-footer);
+  --border-note: var(--p8-gold-500);
+
+  --action-primary-bg: var(--p8-blue-500);
+  --action-primary-fg: var(--p8-white);
+  --action-invert-bg: var(--p8-ink-900);
+  --action-invert-fg: var(--p8-white);
+  --action-onhero-bg: var(--p8-white);
+  --action-onhero-fg: var(--p8-blue-600);
+  --focus-ring: var(--p8-blue-500);
+
+  --gradient-hero: linear-gradient(180deg, var(--p8-blue-400), var(--p8-blue-600));
+  --gradient-protect: linear-gradient(transparent, rgba(6, 25, 36, 0.6));
+}
+
+/* --- typography.css ---
+   Les webfonts sont chargées par next/font/google dans src/app/(app)/layout.tsx
+   (Manrope, Cormorant Garamond, Permanent Marker) et exposées via les variables
+   --font-manrope / --font-cormorant / --font-permanent-marker. */
+:root {
+  --font-sans: var(--font-manrope), 'Manrope', system-ui, sans-serif; /* tout l'UI */
+  --font-serif: var(--font-cormorant), 'Cormorant Garamond', serif; /* wordmark uniquement */
+  --font-marker: var(--font-permanent-marker), 'Permanent Marker', cursive; /* mots-accents, univers */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  /* Échelle desktop (1280 px) */
+  --fs-h1-hero: 44px;
+  --lh-h1-hero: 1.15;
+  --fs-h1: 30px;
+  --fs-h1-product: 28px;
+  --fs-h2: 24px;
+  --fs-h2-sm: 22px;
+  --fs-price-lg: 20px;
+  --fs-body: 15px;
+  --lh-body: 1.7;
+  --fs-body-sm: 13.5px;
+  --lh-body-sm: 1.65;
+  --fs-ui: 14px;
+  --fs-ui-sm: 13px;
+  --fs-meta: 12px;
+  --fs-eyebrow: 10px;
+  --ls-eyebrow: 2px;
+  --fs-kicker: 11px;
+  --ls-kicker: 2px;
+  --fs-btn: 13px;
+  --ls-btn: 1.5px;
+  --fs-payment: 9px;
+  --ls-payment: 1px;
+
+  /* Wordmark */
+  --ls-wordmark: 7px;
+  --fs-wordmark: 23px;
+  --ls-wordmark-sub: 6px;
+  --fs-wordmark-sub: 9px;
+
+  /* Mobile (390 px) : hero 30px, h2 19px, corps 14px */
+}
+
+/* --- spacing.css --- */
+:root {
+  --space-1: 3px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 18px;
+  --space-8: 22px;
+  --space-9: 26px;
+  --space-10: 32px;
+  --space-12: 40px;
+  --space-14: 48px;
+  --space-16: 56px;
+  --space-18: 64px;
+
+  --gutter-page: 48px; /* marge horizontale desktop */
+  --gutter-page-mobile: 18px;
+  --section-y: 64px; /* respiration verticale entre blocs */
+  --grid-gap: 24px; /* grilles produits / catégories */
+  --grid-gap-tight: 18px; /* grille catalogue 4 col. */
+  --header-y: 18px;
+  --footer-y: 56px;
+  --sidebar-w: 250px; /* colonne filtres catalogue */
+  --page-max: 1280px;
+
+  --ratio-product: 4 / 5;
+  --ratio-category: 3 / 4;
+  --hero-h: 560px;
+}
+
+/* --- elevation.css --- */
+:root {
+  /* La marque est anguleuse : rayon 0 partout, sauf pastilles de couleur et interrupteurs. */
+  --radius-none: 0;
+  --radius-pill: 999px;
+  --radius-dot: 50%;
+
+  --rule-accent-w: 34px; /* filet doré au-dessus des titres de section */
+  --rule-accent-h: 3px;
+  --border-w-hairline: 1px;
+  --border-w-control: 1px;
+  --border-w-check: 1.5px;
+  --underline-active: 2px; /* lien de nav actif, lien texte accentué */
+
+  /* Aucune ombre dans l'UI produit : la hiérarchie vient des aplats et des filets. */
+  --shadow-none: none;
+  --shadow-mock-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+}

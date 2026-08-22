@@ -7,10 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
-import { useTheme } from '@/providers/Theme'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
@@ -19,12 +18,16 @@ import { CheckoutForm } from '@/components/forms/CheckoutForm'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { CheckoutAddresses } from '@/components/checkout/CheckoutAddresses'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
-import { Address } from '@/payload-types'
+import { Address, Product, Variant } from '@/payload-types'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { FormItem } from '@/components/forms/FormItem'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+
+// Le panier renvoyé par le plugin est faiblement typé : on annote les callbacks.
+type GalleryItem = NonNullable<Product['gallery']>[number]
+type VariantOptionRef = Variant['options'][number]
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
@@ -34,7 +37,6 @@ export const CheckoutPage: React.FC = () => {
   const router = useRouter()
   const { cart } = useCart()
   const [error, setError] = useState<null | string>(null)
-  const { theme } = useTheme()
   /**
    * State to manage the email input for guest checkout.
    */
@@ -309,20 +311,20 @@ export const CheckoutPage: React.FC = () => {
                   appearance: {
                     theme: 'stripe',
                     variables: {
-                      borderRadius: '6px',
-                      colorPrimary: '#858585',
+                      // Rayon 0 et filets de 1px : mêmes règles que le reste du site.
+                      borderRadius: '0px',
+                      colorPrimary: cssVariables.colors.blue500,
                       gridColumnSpacing: '20px',
                       gridRowSpacing: '20px',
-                      colorBackground: theme === 'dark' ? '#0a0a0a' : cssVariables.colors.base0,
-                      colorDanger: cssVariables.colors.error500,
-                      colorDangerText: cssVariables.colors.error500,
-                      colorIcon:
-                        theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                      colorText: theme === 'dark' ? '#858585' : cssVariables.colors.base1000,
-                      colorTextPlaceholder: '#858585',
-                      fontFamily: 'Geist, sans-serif',
-                      fontSizeBase: '16px',
-                      fontWeightBold: '600',
+                      colorBackground: cssVariables.colors.white,
+                      colorDanger: cssVariables.colors.error,
+                      colorDangerText: cssVariables.colors.error,
+                      colorIcon: cssVariables.colors.ink700,
+                      colorText: cssVariables.colors.ink900,
+                      colorTextPlaceholder: cssVariables.colors.ink500,
+                      fontFamily: 'Manrope, system-ui, sans-serif',
+                      fontSizeBase: '15px',
+                      fontWeightBold: '800',
                       fontWeightNormal: '500',
                       spacingUnit: '4px',
                     },
@@ -366,21 +368,21 @@ export const CheckoutPage: React.FC = () => {
               if (!quantity) return null
 
               let image = gallery?.[0]?.image || meta?.image
-              let price = product?.priceInUSD
+              let price = product?.priceInEUR
 
               const isVariant = Boolean(variant) && typeof variant === 'object'
 
               if (isVariant) {
-                price = variant?.priceInUSD
+                price = variant?.priceInEUR
 
-                const imageVariant = product.gallery?.find((item) => {
-                  if (!item.variantOption) return false
+                const imageVariant = product.gallery?.find((galleryItem: GalleryItem) => {
+                  if (!galleryItem.variantOption) return false
                   const variantOptionID =
-                    typeof item.variantOption === 'object'
-                      ? item.variantOption.id
-                      : item.variantOption
+                    typeof galleryItem.variantOption === 'object'
+                      ? galleryItem.variantOption.id
+                      : galleryItem.variantOption
 
-                  const hasMatch = variant?.options?.some((option) => {
+                  const hasMatch = variant?.options?.some((option: VariantOptionRef) => {
                     if (typeof option === 'object') return option.id === variantOptionID
                     else return option === variantOptionID
                   })
@@ -408,7 +410,7 @@ export const CheckoutPage: React.FC = () => {
                       {variant && typeof variant === 'object' && (
                         <p className="text-sm font-mono text-primary/50 tracking-widest">
                           {variant.options
-                            ?.map((option) => {
+                            ?.map((option: VariantOptionRef) => {
                               if (typeof option === 'object') return option.label
                               return null
                             })

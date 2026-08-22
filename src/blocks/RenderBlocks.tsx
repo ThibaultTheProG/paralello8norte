@@ -2,7 +2,9 @@ import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
+import { CategoryGridComponent } from '@/blocks/CategoryGrid/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { P8HeroComponent } from '@/blocks/P8Hero/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { ThreeItemGridBlock } from '@/blocks/ThreeItemGrid/Component'
@@ -15,12 +17,21 @@ const blockComponents = {
   archive: ArchiveBlock,
   banner: BannerBlock,
   carousel: CarouselBlock,
+  categoryGrid: CategoryGridComponent,
   content: ContentBlock,
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
+  p8Hero: P8HeroComponent,
   threeItemGrid: ThreeItemGridBlock,
 }
+
+/**
+ * Les blocs P8 gèrent leur propre rythme vertical (le design system impose 64px
+ * entre sections, et le hero est pleine largeur) : ils ne doivent pas hériter de
+ * la marge `my-16` appliquée aux blocs du template.
+ */
+const selfSpacedBlocks = new Set(['categoryGrid', 'p8Hero'])
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
@@ -40,7 +51,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="my-16" key={index}>
+                <div className={selfSpacedBlocks.has(blockType) ? undefined : 'my-16'} key={index}>
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore - weird type mismatch here */}
                   <Block id={toKebabCase(blockName!)} {...block} />

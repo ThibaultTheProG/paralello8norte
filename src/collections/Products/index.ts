@@ -49,12 +49,13 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     variants: true,
     enableVariants: true,
     gallery: true,
-    priceInUSD: true,
+    priceInEUR: true,
     inventory: true,
     meta: true,
+    universe: true,
   },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    { name: 'title', type: 'text', localized: true, required: true },
     {
       type: 'tabs',
       tabs: [
@@ -75,18 +76,35 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 },
               }),
               label: false,
+              localized: true,
               required: false,
+            },
+            {
+              // « la referencia » — le clin d'œil culturel derrière la pièce.
+              // Deux phrases maximum : un détail vérifiable, puis une adresse au lecteur.
+              name: 'reference',
+              type: 'textarea',
+              label: 'La referencia',
+              localized: true,
+            },
+            {
+              name: 'composition',
+              type: 'textarea',
+              label: 'Composición y cuidado',
+              localized: true,
             },
             {
               name: 'gallery',
               type: 'array',
-              minRows: 1,
+              // Aucune photo n'est fournie pour l'instant : une galerie vide retombe
+              // sur la réserve #E9F0F4 légendée prescrite par le design system.
+              minRows: 0,
               fields: [
                 {
                   name: 'image',
                   type: 'upload',
                   relationTo: 'media',
-                  required: true,
+                  required: false,
                 },
                 {
                   name: 'variantOption',
@@ -196,6 +214,22 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
           ],
         },
       ],
+    },
+    {
+      // Les quatre univers de la marque. Fixes par construction : ils ne bougeront pas,
+      // d'où un select plutôt qu'une seconde collection.
+      name: 'universe',
+      type: 'select',
+      admin: {
+        position: 'sidebar',
+      },
+      options: [
+        { label: 'Naturaleza', value: 'naturaleza' },
+        { label: 'Aventura', value: 'aventura' },
+        { label: 'Cultura', value: 'cultura' },
+        { label: 'Origen', value: 'origen' },
+      ],
+      required: true,
     },
     {
       name: 'categories',
