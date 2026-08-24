@@ -6,6 +6,7 @@ import { FindOrderForm } from '@/components/forms/FindOrderForm'
 import { getPayload } from 'payload'
 import { headers as getHeaders } from 'next/headers.js'
 import configPromise from '@payload-config'
+import { getTranslations } from 'next-intl/server'
 
 export default async function FindOrderPage() {
   const headers = await getHeaders()
@@ -14,16 +15,22 @@ export default async function FindOrderPage() {
 
   return (
     <div className="container py-16">
-      <FindOrderForm initialEmail={user?.email} />
+      <div className="mx-auto max-w-lg">
+        <FindOrderForm initialEmail={user?.email} />
+      </div>
     </div>
   )
 }
 
-export const metadata: Metadata = {
-  description: 'Find your order using your email and order ID.',
-  openGraph: mergeOpenGraph({
-    title: 'Find order',
-    url: '/find-order',
-  }),
-  title: 'Find order',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Auth')
+
+  return {
+    description: t('buscarPedidoTexto'),
+    openGraph: mergeOpenGraph({
+      title: t('buscarPedido'),
+      url: '/find-order',
+    }),
+    title: t('buscarPedido'),
+  }
 }

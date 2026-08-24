@@ -1,17 +1,10 @@
 import clsx from 'clsx'
 import React from 'react'
 
-/* [
-          classes.message,
-          className,
-          error && classes.error,
-          success && classes.success,
-          warning && classes.warning,
-          !error && !success && !warning && classes.default,
-        ]
-          .filter(Boolean)
-          .join(' '), */
-
+/**
+ * Bandeau d'information : rayon 0, aucune ombre, un filet de 3px à gauche pour
+ * porter la couleur. Le doré ne sert qu'à ce trait, jamais en aplat.
+ */
 export const Message: React.FC<{
   className?: string
   error?: React.ReactNode
@@ -21,22 +14,22 @@ export const Message: React.FC<{
 }> = ({ className, error, message, success, warning }) => {
   const messageToRender = message || error || success || warning
 
-  if (messageToRender) {
-    return (
-      <div
-        className={clsx(
-          'p-4 my-8 rounded-lg',
-          {
-            'bg-success ': Boolean(success),
-            ' bg-warning': Boolean(warning),
-            'bg-error': Boolean(error),
-          },
-          className,
-        )}
-      >
-        {messageToRender}
-      </div>
-    )
-  }
-  return null
+  if (!messageToRender) return null
+
+  return (
+    <div
+      className={clsx(
+        'text-ui-sm text-ink-body border-l-[3px] px-4 py-3 font-medium',
+        {
+          'bg-sand border-success': Boolean(success),
+          'bg-note border-gold': Boolean(warning),
+          'border-error bg-error/5': Boolean(error),
+          'bg-mist border-blue-brand': !success && !warning && !error,
+        },
+        className,
+      )}
+    >
+      {messageToRender}
+    </div>
+  )
 }

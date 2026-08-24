@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 
 import { RenderParams } from '@/components/RenderParams'
+import { SectionHeading } from '@/components/p8'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import React from 'react'
 import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { getTranslations } from 'next-intl/server'
 
 import { CreateAccountForm } from '@/components/forms/CreateAccountForm'
 import { redirect } from 'next/navigation'
@@ -14,25 +16,38 @@ export default async function CreateAccount() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const t = await getTranslations('Auth')
 
   if (user) {
-    redirect(`/account?warning=${encodeURIComponent('You are already logged in.')}`)
+    redirect(`/account?warning=${encodeURIComponent(t('yaIniciaste'))}`)
   }
 
   return (
     <div className="container py-16">
-      <h1 className="text-xl mb-4">Create Account</h1>
-      <RenderParams />
-      <CreateAccountForm />
+      <div className="mx-auto max-w-lg">
+        <RenderParams className="mb-8" />
+
+        <SectionHeading
+          className="mb-8"
+          subtitle={t('crearCuentaTexto')}
+          title={t('crearCuenta')}
+        />
+
+        <CreateAccountForm />
+      </div>
     </div>
   )
 }
 
-export const metadata: Metadata = {
-  description: 'Create an account or log in to your existing account.',
-  openGraph: mergeOpenGraph({
-    title: 'Account',
-    url: '/account',
-  }),
-  title: 'Account',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Auth')
+
+  return {
+    description: t('crearCuentaTexto'),
+    openGraph: mergeOpenGraph({
+      title: t('crearCuenta'),
+      url: '/create-account',
+    }),
+    title: t('crearCuenta'),
+  }
 }

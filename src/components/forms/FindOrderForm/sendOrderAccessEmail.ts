@@ -39,20 +39,19 @@ export async function sendOrderAccessEmail({
     const serverURL = getServerSideURL()
     const orderURL = `${serverURL}/orders/${order.id}?email=${encodeURIComponent(email)}&accessToken=${order.accessToken}`
 
+    // Copie livrée : espagnol du Venezuela, comme tout le reste du site.
     const emailBody = `
-        <h1>View Your Order</h1>
-        <p>Click the link below to view your order details:</p>
-        <p><a href="${orderURL}">View Order #${order.id}</a></p>
-        <p>Or copy and paste this URL into your browser:</p>
+        <h1>Tu pedido en Paralelo 8 Norte</h1>
+        <p>Haz clic en el enlace para ver los detalles de tu pedido:</p>
+        <p><a href="${orderURL}">Ver el pedido n.º ${order.id}</a></p>
+        <p>Si el enlace no funciona, copia esta dirección en tu navegador:</p>
         <p>${orderURL}</p>
-        <p>This link will give you access to view your order details.</p>
+        <p>Con ese enlace entras directo a tu pedido, sin cuenta.</p>
       `
-
-    console.log('[sendOrderAccessEmail] Email body:', emailBody)
 
     await payload.sendEmail({
       to: email,
-      subject: `Access your order #${order.id}`,
+      subject: `Tu pedido n.º ${order.id}`,
       html: emailBody,
     })
 

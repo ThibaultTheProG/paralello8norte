@@ -4,31 +4,30 @@ import type { CartItem } from '@/components/Cart'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { XIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React from 'react'
 
+/** Retrait d'une ligne du panier : icône filaire, pas de pastille pleine. */
 export function DeleteItemButton({ item }: { item: CartItem }) {
   const { isLoading, removeItem } = useCart()
+  const t = useTranslations('Carrito')
   const itemId = item.id
 
   return (
-    <form>
-      <button
-        aria-label="Remove cart item"
-        className={clsx(
-          'ease hover:cursor-pointer flex h-[17px] w-[17px] items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
-          {
-            'cursor-not-allowed px-0': !itemId || isLoading,
-          },
-        )}
-        disabled={!itemId || isLoading}
-        onClick={(e: React.FormEvent<HTMLButtonElement>) => {
-          e.preventDefault()
-          if (itemId) removeItem(itemId)
-        }}
-        type="button"
-      >
-        <XIcon className="hover:text-accent-3 mx-px h-4 w-4 text-white dark:text-black" />
-      </button>
-    </form>
+    <button
+      aria-label={t('quitarArticulo')}
+      className={clsx(
+        'text-ink-muted hover:text-ink flex size-6 items-center justify-center transition-colors duration-[120ms]',
+        { 'cursor-not-allowed opacity-45': !itemId || isLoading },
+      )}
+      disabled={!itemId || isLoading}
+      onClick={(e: React.FormEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        if (itemId) removeItem(itemId)
+      }}
+      type="button"
+    >
+      <XIcon className="size-4" strokeWidth={1.8} />
+    </button>
   )
 }

@@ -12,6 +12,7 @@ import {
 import { AddressForm } from '@/components/forms/AddressForm'
 import { Address } from '@/payload-types'
 import { DefaultDocumentIDType } from 'payload'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   addressID?: DefaultDocumentIDType
@@ -26,12 +27,13 @@ type Props = {
 export const CreateAddressModal: React.FC<Props> = ({
   addressID,
   initialData,
-  buttonText = 'Add a new address',
-  modalTitle = 'Add a new address',
+  buttonText,
+  modalTitle,
   callback,
   skipSubmission,
   disabled,
 }) => {
+  const t = useTranslations('Cuenta')
   const [open, setOpen] = useState(false)
   const handleOpenChange = (state: boolean) => {
     setOpen(state)
@@ -52,12 +54,18 @@ export const CreateAddressModal: React.FC<Props> = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild disabled={disabled}>
-        <Button variant={'outline'}>{buttonText}</Button>
+        <Button size="sm" variant={'outline'}>
+          {buttonText ?? t('nuevaDireccion')}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{modalTitle}</DialogTitle>
-          <DialogDescription>This address will be connected to your account.</DialogDescription>
+          <DialogTitle className="text-h2-sm text-ink font-extrabold">
+            {modalTitle ?? t('nuevaDireccion')}
+          </DialogTitle>
+          <DialogDescription className="text-ui-sm text-ink-muted">
+            {t('direccionVinculada')}
+          </DialogDescription>
         </DialogHeader>
 
         <AddressForm

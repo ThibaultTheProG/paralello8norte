@@ -11,6 +11,7 @@ import { useAuth } from '@/providers/Auth'
 import { useRouter } from 'next/navigation'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 type FormData = {
@@ -22,6 +23,8 @@ type FormData = {
 
 export const AccountForm: React.FC = () => {
   const { setUser, user } = useAuth()
+  const t = useTranslations('Cuenta')
+  const ta = useTranslations('Auth')
   const [changePassword, setChangePassword] = useState(false)
 
   const {
@@ -53,7 +56,7 @@ export const AccountForm: React.FC = () => {
         if (response.ok) {
           const json = await response.json()
           setUser(json.doc)
-          toast.success('Successfully updated account.')
+          toast.success(t('cuentaActualizada'))
           setChangePassword(false)
           reset({
             name: json.doc.name,
@@ -62,18 +65,18 @@ export const AccountForm: React.FC = () => {
             passwordConfirm: '',
           })
         } else {
-          toast.error('There was a problem updating your account.')
+          toast.error(t('errorActualizar'))
         }
       }
     },
-    [user, setUser, reset],
+    [user, setUser, reset, t],
   )
 
   useEffect(() => {
     if (user === null) {
       router.push(
         `/login?error=${encodeURIComponent(
-          'You must be logged in to view this page.',
+          t('debesIniciarSesion'),
         )}&redirect=${encodeURIComponent('/account')}`,
       )
     }
@@ -87,47 +90,40 @@ export const AccountForm: React.FC = () => {
         passwordConfirm: '',
       })
     }
-  }, [user, router, reset, changePassword])
+  }, [user, router, reset, changePassword, t])
 
   return (
     <form className="max-w-xl" onSubmit={handleSubmit(onSubmit)}>
       {!changePassword ? (
         <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p className="">
-              {'Change your account details below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                click here
-              </Button>
-              {' to change your password.'}
-            </p>
-          </div>
+          <p className="text-ui-sm text-ink-body mb-8">
+            {`${t('ajustesTexto')} `}
+            <button
+              className="text-blue-brand border-gold cursor-pointer border-b-2 font-semibold"
+              onClick={() => setChangePassword(!changePassword)}
+              type="button"
+            >
+              {t('clicAqui')}
+            </button>
+            {` ${t('paraCambiarContrasena')}`}
+          </p>
 
           <div className="flex flex-col gap-8 mb-8">
             <FormItem>
-              <Label htmlFor="email" className="mb-2">
-                Email Address
-              </Label>
+              <Label htmlFor="email">{ta('correo')}</Label>
               <Input
                 id="email"
-                {...register('email', { required: 'Please provide an email.' })}
+                {...register('email', { required: ta('correoRequerido') })}
                 type="email"
               />
               {errors.email && <FormError message={errors.email.message} />}
             </FormItem>
 
             <FormItem>
-              <Label htmlFor="name" className="mb-2">
-                Name
-              </Label>
+              <Label htmlFor="name">{ta('nombre')}</Label>
               <Input
                 id="name"
-                {...register('name', { required: 'Please provide a name.' })}
+                {...register('name', { required: t('nombreRequerido') })}
                 type="text"
               />
               {errors.name && <FormError message={errors.name.message} />}
@@ -136,43 +132,36 @@ export const AccountForm: React.FC = () => {
         </Fragment>
       ) : (
         <Fragment>
-          <div className="prose dark:prose-invert mb-8">
-            <p>
-              {'Change your password below, or '}
-              <Button
-                className="px-0 text-inherit underline hover:cursor-pointer"
-                onClick={() => setChangePassword(!changePassword)}
-                type="button"
-                variant="link"
-              >
-                cancel
-              </Button>
-              .
-            </p>
-          </div>
+          <p className="text-ui-sm text-ink-body mb-8">
+            {`${t('cambiaContrasenaTexto')} `}
+            <button
+              className="text-blue-brand border-gold cursor-pointer border-b-2 font-semibold"
+              onClick={() => setChangePassword(!changePassword)}
+              type="button"
+            >
+              {t('cancelar').toLowerCase()}
+            </button>
+            {'.'}
+          </p>
 
           <div className="flex flex-col gap-8 mb-8">
             <FormItem>
-              <Label htmlFor="password" className="mb-2">
-                New password
-              </Label>
+              <Label htmlFor="password">{t('nuevaContrasena')}</Label>
               <Input
                 id="password"
-                {...register('password', { required: 'Please provide a new password.' })}
+                {...register('password', { required: ta('contrasenaRequerida') })}
                 type="password"
               />
               {errors.password && <FormError message={errors.password.message} />}
             </FormItem>
 
             <FormItem>
-              <Label htmlFor="passwordConfirm" className="mb-2">
-                Confirm password
-              </Label>
+              <Label htmlFor="passwordConfirm">{ta('confirmarContrasena')}</Label>
               <Input
                 id="passwordConfirm"
                 {...register('passwordConfirm', {
-                  required: 'Please confirm your new password.',
-                  validate: (value) => value === password.current || 'The passwords do not match',
+                  required: ta('confirmaContrasena'),
+                  validate: (value) => value === password.current || ta('contrasenasNoCoinciden'),
                 })}
                 type="password"
               />
@@ -183,10 +172,10 @@ export const AccountForm: React.FC = () => {
       )}
       <Button disabled={isLoading || isSubmitting || !isDirty} type="submit" variant="default">
         {isLoading || isSubmitting
-          ? 'Processing'
+          ? ta('procesando')
           : changePassword
-            ? 'Change Password'
-            : 'Update Account'}
+            ? t('cambiarContrasena')
+            : t('actualizarCuenta')}
       </Button>
     </form>
   )

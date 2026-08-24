@@ -4,10 +4,13 @@ import { CartItem } from '@/components/Cart'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { MinusIcon, PlusIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import React, { useMemo } from 'react'
 
+/** Pas de rayon, pas de cercle : le sélecteur de quantité est un rectangle à filet. */
 export function EditItemQuantityButton({ type, item }: { item: CartItem; type: 'minus' | 'plus' }) {
   const { decrementItem, incrementItem, isLoading } = useCart()
+  const t = useTranslations('Carrito')
 
   const disabled = useMemo(() => {
     if (!item.id) return true
@@ -34,36 +37,31 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
   }, [item, type])
 
   return (
-    <form>
-      <button
-        disabled={disabled || isLoading}
-        aria-label={type === 'plus' ? 'Increase item quantity' : 'Reduce item quantity'}
-        className={clsx(
-          'ease hover:cursor-pointer flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full px-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80',
-          {
-            'cursor-not-allowed': disabled || isLoading,
-            'ml-auto': type === 'minus',
-          },
-        )}
-        onClick={(e: React.FormEvent<HTMLButtonElement>) => {
-          e.preventDefault()
+    <button
+      disabled={disabled || isLoading}
+      aria-label={type === 'plus' ? t('aumentar') : t('disminuir')}
+      className={clsx(
+        'text-ink hover:text-blue-brand flex h-8 w-8 flex-none items-center justify-center transition-colors duration-[120ms]',
+        { 'cursor-not-allowed opacity-45': disabled || isLoading },
+      )}
+      onClick={(e: React.FormEvent<HTMLButtonElement>) => {
+        e.preventDefault()
 
-          if (item.id) {
-            if (type === 'plus') {
-              incrementItem(item.id)
-            } else {
-              decrementItem(item.id)
-            }
+        if (item.id) {
+          if (type === 'plus') {
+            incrementItem(item.id)
+          } else {
+            decrementItem(item.id)
           }
-        }}
-        type="button"
-      >
-        {type === 'plus' ? (
-          <PlusIcon className="h-4 w-4 dark:text-neutral-500 hover:text-blue-300" />
-        ) : (
-          <MinusIcon className="h-4 w-4 dark:text-neutral-500 hover:text-blue-300" />
-        )}
-      </button>
-    </form>
+        }
+      }}
+      type="button"
+    >
+      {type === 'plus' ? (
+        <PlusIcon className="size-3.5" strokeWidth={1.8} />
+      ) : (
+        <MinusIcon className="size-3.5" strokeWidth={1.8} />
+      )}
+    </button>
   )
 }

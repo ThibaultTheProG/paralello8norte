@@ -1,32 +1,32 @@
 import type { Metadata } from 'next'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import React, { Fragment } from 'react'
+import { getTranslations } from 'next-intl/server'
+import React, { Suspense } from 'react'
 import { ConfirmOrder } from '@/components/checkout/ConfirmOrder'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
-
-export default async function ConfirmOrderPage({
-  searchParams: searchParamsPromise,
-}: {
-  searchParams: SearchParams
-}) {
-  const searchParams = await searchParamsPromise
-
-  const paymentIntent = searchParams.paymentId
-
+export default async function ConfirmOrderPage() {
   return (
-    <div className="container min-h-[90vh] flex py-12">
-      <ConfirmOrder />
+    <div className="container flex min-h-[70vh] items-start justify-center py-20">
+      {/* `ConfirmOrder` lit `payment_intent` dans l'URL : sans cette frontière,
+          le prérendu de la page échoue sur `useSearchParams`. */}
+      <Suspense fallback={<LoadingSpinner className="h-6 w-12" />}>
+        <ConfirmOrder />
+      </Suspense>
     </div>
   )
 }
 
-export const metadata: Metadata = {
-  description: 'Confirm order.',
-  openGraph: mergeOpenGraph({
-    title: 'Confirming order',
-    url: '/checkout/confirm-order',
-  }),
-  title: 'Confirming order',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Checkout')
+
+  return {
+    description: t('confirmandoPedido'),
+    openGraph: mergeOpenGraph({
+      title: t('confirmandoPedido'),
+      url: '/checkout/confirm-order',
+    }),
+    title: t('confirmandoPedido'),
+  }
 }

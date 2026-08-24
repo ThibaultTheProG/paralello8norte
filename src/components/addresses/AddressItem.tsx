@@ -3,6 +3,7 @@
 import React from 'react'
 import type { Address } from '@/payload-types'
 import { CreateAddressModal } from '@/components/addresses/CreateAddressModal'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   address: Partial<Omit<Address, 'country'>> & { country?: string } // Allow address to be partial and entirely optional as this is entirely for display purposes
@@ -31,31 +32,34 @@ export const AddressItem: React.FC<Props> = ({
   beforeActions,
   afterActions,
 }) => {
+  const t = useTranslations('Cuenta')
+
   if (!address) {
     return null
   }
 
   return (
-    <div className="flex items-center">
-      <div className="grow">
-        <p className="font-medium">
+    <div className="flex items-start justify-between gap-6">
+      <div className="text-ui-sm text-ink-body grow leading-relaxed">
+        <p className="text-ink font-extrabold">
           {address.title && <span>{address.title} </span>}
           {address.firstName} {address.lastName}
         </p>
-        <p>{address.company && <span>{address.company} </span>}</p>
-        <p>{address.phone && <span>{address.phone}</span>}</p>
+        {address.company && <p>{address.company}</p>}
+        {address.phone && <p>{address.phone}</p>}
         <p>
           {address.addressLine1}
           {address.addressLine2 && <>, {address.addressLine2}</>}
         </p>
         <p>
-          {address.city}, {address.state} {address.postalCode}
+          {address.city}
+          {address.state ? `, ${address.state}` : ''} {address.postalCode}
         </p>
         <p>{address.country}</p>
       </div>
 
       {!hideActions && address.id && (
-        <div className="shrink flex flex-col gap-2">
+        <div className="flex shrink-0 flex-col gap-2">
           {actions ? (
             actions
           ) : (
@@ -65,8 +69,8 @@ export const AddressItem: React.FC<Props> = ({
                 <CreateAddressModal
                   addressID={address.id}
                   initialData={address}
-                  buttonText={'Edit'}
-                  modalTitle={'Edit address'}
+                  buttonText={t('editarDireccion')}
+                  modalTitle={t('editarDireccion')}
                 />
               )}
               {afterActions}

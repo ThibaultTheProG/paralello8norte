@@ -31,6 +31,19 @@ export const Media: CollectionConfig = {
       required: true,
     },
     {
+      // Empreinte du mockup Printify dont ce média est issu. C'est la clé de
+      // dédoublonnage de la synchro : sans elle, chaque passage re-téléchargerait
+      // les mêmes rendus.
+      name: 'printifySrc',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+      },
+      index: true,
+      label: 'Printify — URL source',
+    },
+    {
       name: 'caption',
       type: 'richText',
       editor: lexicalEditor({

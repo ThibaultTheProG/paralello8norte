@@ -59,6 +59,8 @@ export default async function CatalogoPage({ searchParams }: Props) {
     optionsResult.docs.filter((o) => names.includes(axisName(o)))
 
   const toFacet = (option: (typeof optionsResult.docs)[number]): FacetOption => ({
+    // `hex` est renseigné par la synchro Printify pour l'axe couleur.
+    hex: option.hex,
     label: option.label,
     value: option.value.toLowerCase(),
   })

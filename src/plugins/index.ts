@@ -15,6 +15,13 @@ import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
+import {
+  printifyOrderFields,
+  printifyProductFields,
+  printifyVariantFields,
+  printifyVariantOptionFields,
+} from '@/collections/printify/fields'
+import { submitOrderToPrintifyHook } from '@/collections/printify/submitOrderHook'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -94,8 +101,13 @@ export const plugins: Plugin[] = [
     orders: {
       ordersCollectionOverride: ({ defaultCollection }) => ({
         ...defaultCollection,
+        hooks: {
+          ...defaultCollection.hooks,
+          afterChange: [...(defaultCollection.hooks?.afterChange ?? []), submitOrderToPrintifyHook],
+        },
         fields: [
           ...defaultCollection.fields,
+          ...printifyOrderFields,
           {
             name: 'accessToken',
             type: 'text',
@@ -129,7 +141,26 @@ export const plugins: Plugin[] = [
       ],
     },
     products: {
-      productsCollectionOverride: ProductsCollection,
+      productsCollectionOverride: async (args) => {
+        const collection = await ProductsCollection(args)
+
+        return {
+          ...collection,
+          fields: [...collection.fields, ...printifyProductFields],
+        }
+      },
+      // `variants` est imbriqué dans `products` : posé à la racine, l'override
+      // est silencieusement ignoré et les champs de liaison n'existent pas.
+      variants: {
+        variantOptionsCollectionOverride: ({ defaultCollection }) => ({
+          ...defaultCollection,
+          fields: [...defaultCollection.fields, ...printifyVariantOptionFields],
+        }),
+        variantsCollectionOverride: ({ defaultCollection }) => ({
+          ...defaultCollection,
+          fields: [...defaultCollection.fields, ...printifyVariantFields],
+        }),
+      },
     },
   }),
 ]

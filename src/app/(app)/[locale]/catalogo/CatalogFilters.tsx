@@ -12,7 +12,7 @@ import { hasActiveFilters, stockHref, toggleHref } from './filters'
 /** Les 4 univers sont un axe fixe de la marque : ils ne viennent pas de la base. */
 const UNIVERSES = ['naturaleza', 'aventura', 'cultura', 'origen'] as const
 
-export type FacetOption = { label: string; value: string }
+export type FacetOption = { hex?: null | string; label: string; value: string }
 
 type Props = {
   categories: FacetOption[]
@@ -63,7 +63,7 @@ export const CatalogFilters: React.FC<Props> = async ({ categories, colors, filt
           <div className="flex flex-wrap gap-2">
             {colors.map((color) => (
               <ColorSwatch
-                color={colorHex(color.value)}
+                color={colorHex(color.value, color.hex)}
                 href={toggleHref(filters, 'color', color.value)}
                 key={color.value}
                 name={color.label}

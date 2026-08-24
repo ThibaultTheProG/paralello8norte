@@ -1,13 +1,16 @@
 'use client'
 
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { Rule } from '@/components/p8'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 export const ConfirmOrder: React.FC = () => {
   const { confirmOrder } = usePayments()
   const { cart } = useCart()
+  const t = useTranslations('Checkout')
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -54,10 +57,11 @@ export const ConfirmOrder: React.FC = () => {
   }, [cart, confirmOrder, router, searchParams])
 
   return (
-    <div className="text-center w-full flex flex-col items-center justify-start gap-4">
-      <h1 className="text-2xl">Confirming Order</h1>
+    <div className="flex w-full flex-col items-center justify-start gap-6 text-center">
+      <Rule className="mx-auto" />
+      <h1 className="text-h2 text-ink m-0 font-extrabold">{t('confirmandoPedido')}</h1>
 
-      <LoadingSpinner className="w-12 h-6" />
+      <LoadingSpinner className="h-6 w-12" />
     </div>
   )
 }

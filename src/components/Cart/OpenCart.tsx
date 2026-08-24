@@ -22,7 +22,10 @@ export function OpenCartButton({
   return (
     <button
       aria-label={t('carrito')}
-      className={cn('text-ink hover:text-blue-brand relative transition-colors duration-[120ms]', className)}
+      className={cn(
+        'text-ink hover:text-blue-brand relative transition-colors duration-[120ms]',
+        className,
+      )}
       type="button"
       {...rest}
     >

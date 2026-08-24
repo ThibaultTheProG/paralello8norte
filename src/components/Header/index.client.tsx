@@ -67,10 +67,16 @@ export function HeaderClient() {
           <span className="hidden font-semibold sm:inline">EUR ▾</span>
 
           <Link aria-label={t('buscar')} href="/catalogo">
-            <Search className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]" strokeWidth={1.8} />
+            <Search
+              className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]"
+              strokeWidth={1.8}
+            />
           </Link>
           <Link aria-label={t('cuenta')} href="/account">
-            <User className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]" strokeWidth={1.8} />
+            <User
+              className="hover:text-blue-brand size-[18px] transition-colors duration-[120ms]"
+              strokeWidth={1.8}
+            />
           </Link>
 
           <Suspense fallback={<OpenCartButton />}>

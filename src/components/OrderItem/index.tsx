@@ -4,44 +4,50 @@ import { Button } from '@/components/ui/button'
 import { Order } from '@/payload-types'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   order: Order
 }
 
+/** Ligne de commande : encadré à filet, rayon 0, aucune ombre. */
 export const OrderItem: React.FC<Props> = ({ order }) => {
-  const itemsLabel = order.items?.length === 1 ? 'Item' : 'Items'
+  const t = useTranslations('Pedido')
+  const tc = useTranslations('Cuenta')
+  const tCart = useTranslations('Carrito')
+
+  const count = order.items?.length ?? 0
 
   return (
-    <div className="bg-card border rounded-lg px-4 py-2 md:px-6 md:py-4 flex flex-col sm:flex-row gap-12 sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-sm uppercase font-mono tracking-widest text-primary/50 truncate max-w-32 sm:max-w-none">{`#${order.id}`}</h3>
+    <div className="border-hairline flex flex-col gap-6 border p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-12 md:p-6">
+      <div className="flex flex-col gap-3">
+        <h3 className="text-meta text-ink-muted max-w-40 truncate font-bold tracking-[1px] uppercase sm:max-w-none">
+          {`${t('numero')} ${order.id}`}
+        </h3>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-6">
-          <p className="text-xl">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:gap-5">
+          <p className="text-ui text-ink font-semibold">
             <time dateTime={order.createdAt}>
-              {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
+              {formatDateTime({ date: order.createdAt, format: 'dd/MM/yyyy' })}
             </time>
           </p>
 
           {order.status && <OrderStatus status={order.status} />}
         </div>
 
-        <p className="flex gap-2 text-xs text-primary/80">
-          <span>
-            {order.items?.length} {itemsLabel}
-          </span>
+        <p className="text-meta text-ink-muted flex gap-2">
+          <span>{`${count} ${count === 1 ? tCart('articulo') : tCart('articulos')}`}</span>
           {order.amount && (
             <>
-              <span>•</span>
+              <span>·</span>
               <Price as="span" amount={order.amount} currencyCode={order.currency ?? undefined} />
             </>
           )}
         </p>
       </div>
 
-      <Button variant="outline" asChild className="self-start sm:self-auto">
-        <Link href={`/orders/${order.id}`}>View Order</Link>
+      <Button variant="outline" size="sm" asChild className="self-start sm:self-auto">
+        <Link href={`/orders/${order.id}`}>{tc('verPedido')}</Link>
       </Button>
     </div>
   )

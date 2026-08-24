@@ -1,10 +1,9 @@
+import { ImagePlaceholder } from '@/components/p8'
 import { Media } from '@/components/Media'
-import { OrderStatus } from '@/components/OrderStatus'
 import { Price } from '@/components/Price'
-import { Button } from '@/components/ui/button'
-import { Media as MediaType, Order, Product, Variant } from '@/payload-types'
-import { formatDateTime } from '@/utilities/formatDateTime'
+import { Product, Variant } from '@/payload-types'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   product: Product
@@ -17,6 +16,10 @@ type Props = {
   currencyCode?: string
 }
 
+/**
+ * Ligne d'article dans une commande. La vignette est carrée, l'image en
+ * `cover` ; sans visuel, on retombe sur la réserve légendée du système.
+ */
 export const ProductItem: React.FC<Props> = ({
   product,
   style = 'default',
@@ -24,6 +27,7 @@ export const ProductItem: React.FC<Props> = ({
   variant,
   currencyCode,
 }) => {
+  const t = useTranslations('Pedido')
   const { title } = product
 
   const metaImage =
@@ -60,39 +64,41 @@ export const ProductItem: React.FC<Props> = ({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
-        <div className="relative w-full h-full">
-          {image && typeof image !== 'string' && (
-            <Media className="" fill imgClassName="rounded-lg object-cover" resource={image} />
-          )}
-        </div>
+      <div className="border-hairline relative size-20 shrink-0 border">
+        {image && typeof image !== 'string' ? (
+          <Media fill imgClassName="object-cover" resource={image} />
+        ) : (
+          <ImagePlaceholder className="h-full w-full" />
+        )}
       </div>
-      <div className="flex grow justify-between items-center">
+      <div className="flex grow items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="font-medium text-lg">
-            <Link href={itemURL}>{title}</Link>
+          <p className="text-ui text-ink font-semibold">
+            <Link className="hover:text-blue-brand" href={itemURL}>
+              {title}
+            </Link>
           </p>
           {variant && (
-            <p className="text-sm font-mono text-primary/50 tracking-widest">
+            <p className="text-meta text-ink-muted">
               {variant.options
                 ?.map((option) => {
                   if (typeof option === 'object') return option.label
                   return null
                 })
-                .join(', ')}
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
-          <div>
-            {'x'}
-            {quantity}
-          </div>
+          <p className="text-meta text-ink-muted">{`× ${quantity}`}</p>
         </div>
 
         {itemPrice && quantity && (
           <div className="text-right">
-            <p className="font-medium text-lg">Subtotal</p>
+            <p className="text-meta text-ink-muted font-bold tracking-[1px] uppercase">
+              {t('subtotal')}
+            </p>
             <Price
-              className="font-mono text-primary/50 text-sm"
+              className="text-ui text-ink font-extrabold"
               amount={itemPrice * quantity}
               currencyCode={currencyCode}
             />

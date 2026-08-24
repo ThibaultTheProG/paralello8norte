@@ -22,7 +22,9 @@ export const LocaleSwitcher: React.FC = () => {
         <Link
           className={cn(
             'text-meta transition-colors duration-[120ms]',
-            locale === active ? 'text-ink font-bold' : 'text-ink-disabled hover:text-ink font-medium',
+            locale === active
+              ? 'text-ink font-bold'
+              : 'text-ink-disabled hover:text-ink font-medium',
           )}
           href={pathname}
           key={locale}

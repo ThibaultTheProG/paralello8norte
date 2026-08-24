@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import React, { useCallback, FormEvent } from 'react'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { Address } from '@/payload-types'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   customerEmail?: string
@@ -20,6 +21,7 @@ export const CheckoutForm: React.FC<Props> = ({
   billingAddress,
   setProcessingPayment,
 }) => {
+  const t = useTranslations('Checkout')
   const stripe = useStripe()
   const elements = useElements()
   const [error, setError] = React.useState<null | string>(null)
@@ -96,9 +98,8 @@ export const CheckoutForm: React.FC<Props> = ({
                 router.push(redirectUrl)
               }
             } catch (err) {
-              console.log({ err })
-              const msg = err instanceof Error ? err.message : 'Something went wrong.'
-              setError(`Error while confirming order: ${msg}`)
+              console.error(err)
+              setError(t('errorConfirmar'))
               setIsLoading(false)
             }
           }
@@ -107,8 +108,8 @@ export const CheckoutForm: React.FC<Props> = ({
             setIsLoading(false)
           }
         } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Something went wrong.'
-          setError(`Error while submitting payment: ${msg}`)
+          console.error(err)
+          setError(t('errorPago'))
           setIsLoading(false)
           setProcessingPayment(false)
         }
@@ -129,16 +130,17 @@ export const CheckoutForm: React.FC<Props> = ({
       confirmOrder,
       clearCart,
       router,
+      t,
     ],
   )
 
   return (
     <form onSubmit={handleSubmit}>
-      {error && <Message error={error} />}
+      {error && <Message className="mb-6" error={error} />}
       <PaymentElement />
       <div className="mt-8 flex gap-4">
         <Button disabled={!stripe || isLoading} type="submit" variant="default">
-          {isLoading ? 'Loading...' : 'Pay now'}
+          {isLoading ? t('procesando') : t('pagarAhora')}
         </Button>
       </div>
     </form>

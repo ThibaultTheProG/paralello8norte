@@ -3,10 +3,11 @@
 import { FormError } from '@/components/forms/FormError'
 import { FormItem } from '@/components/forms/FormItem'
 import { Message } from '@/components/Message'
+import { SectionHeading } from '@/components/p8'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -17,6 +18,7 @@ type FormData = {
 export const ForgotPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const t = useTranslations('Auth')
 
   const {
     formState: { errors },
@@ -24,69 +26,68 @@ export const ForgotPasswordForm: React.FC = () => {
     register,
   } = useForm<FormData>()
 
-  const onSubmit = useCallback(async (data: FormData) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/forgot-password`,
-      {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/forgot-password`,
+        {
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      },
-    )
-
-    if (response.ok) {
-      setSuccess(true)
-      setError('')
-    } else {
-      setError(
-        'There was a problem while attempting to send you a password reset email. Please try again.',
       )
-    }
-  }, [])
+
+      if (response.ok) {
+        setSuccess(true)
+        setError('')
+      } else {
+        setError(t('errorGenerico'))
+      }
+    },
+    [t],
+  )
+
+  if (success) {
+    return (
+      <Fragment>
+        <SectionHeading
+          size="sm"
+          subtitle={t('solicitudEnviadaTexto')}
+          title={t('solicitudEnviada')}
+        />
+      </Fragment>
+    )
+  }
 
   return (
     <Fragment>
-      {!success && (
-        <React.Fragment>
-          <h1 className="text-xl mb-4">Forgot Password</h1>
-          <div className="prose dark:prose-invert mb-8">
-            <p>
-              {`Please enter your email below. You will receive an email message with instructions on
-              how to reset your password. To manage your all users, `}
-              <Link href="/admin/collections/users">login to the admin dashboard</Link>.
-            </p>
-          </div>
-          <form className="max-w-lg" onSubmit={handleSubmit(onSubmit)}>
-            <Message className="mb-8" error={error} />
+      <SectionHeading
+        className="mb-8"
+        size="sm"
+        subtitle={t('recuperarTexto')}
+        title={t('recuperarContrasena')}
+      />
 
-            <FormItem className="mb-8">
-              <Label htmlFor="email" className="mb-2">
-                Email address
-              </Label>
-              <Input
-                id="email"
-                {...register('email', { required: 'Please provide your email.' })}
-                type="email"
-              />
-              {errors.email && <FormError message={errors.email.message} />}
-            </FormItem>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {error && <Message className="mb-8" error={error} />}
 
-            <Button type="submit" variant="default">
-              Forgot Password
-            </Button>
-          </form>
-        </React.Fragment>
-      )}
-      {success && (
-        <React.Fragment>
-          <h1 className="text-xl mb-4">Request submitted</h1>
-          <div className="prose dark:prose-invert">
-            <p>Check your email for a link that will allow you to securely reset your password.</p>
-          </div>
-        </React.Fragment>
-      )}
+        <FormItem className="mb-8">
+          <Label htmlFor="email">{t('correo')}</Label>
+          <Input
+            id="email"
+            autoComplete="email"
+            {...register('email', { required: t('correoRequerido') })}
+            type="email"
+          />
+          {errors.email && <FormError message={errors.email.message} />}
+        </FormItem>
+
+        <Button type="submit" variant="default">
+          {t('enviar')}
+        </Button>
+      </form>
     </Fragment>
   )
 }

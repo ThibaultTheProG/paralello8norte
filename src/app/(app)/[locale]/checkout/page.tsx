@@ -1,49 +1,37 @@
 import type { Metadata } from 'next'
 
+import { Message } from '@/components/Message'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import React, { Fragment } from 'react'
+import { getTranslations } from 'next-intl/server'
+import React from 'react'
 
 import { CheckoutPage } from '@/components/checkout/CheckoutPage'
 
-export default function Checkout() {
+export default async function Checkout() {
+  const t = await getTranslations('Checkout')
+
   return (
-    <div className="container min-h-[90vh] flex">
+    <div className="container flex min-h-[70vh] flex-col">
       {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
-        <div>
-          <Fragment>
-            {'To enable checkout, you must '}
-            <a
-              href="https://dashboard.stripe.com/test/apikeys"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              obtain your Stripe API Keys
-            </a>
-            {' then set them as environment variables. See the '}
-            <a
-              href="https://github.com/payloadcms/payload/blob/3.x/templates/ecommerce/README.md#stripe"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              README
-            </a>
-            {' for more details.'}
-          </Fragment>
-        </div>
+        <Message className="mt-8" warning={t('faltanClavesStripe')} />
       )}
 
-      <h1 className="sr-only">Checkout</h1>
+      <h1 className="sr-only">{t('titulo')}</h1>
 
       <CheckoutPage />
     </div>
   )
 }
 
-export const metadata: Metadata = {
-  description: 'Checkout.',
-  openGraph: mergeOpenGraph({
-    title: 'Checkout',
-    url: '/checkout',
-  }),
-  title: 'Checkout',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Checkout')
+
+  return {
+    description: t('titulo'),
+    openGraph: mergeOpenGraph({
+      title: t('titulo'),
+      url: '/checkout',
+    }),
+    title: t('titulo'),
+  }
 }

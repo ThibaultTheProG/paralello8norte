@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Address } from '@/payload-types'
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 type Props = {
@@ -22,17 +23,14 @@ type Props = {
   setSubmit?: React.Dispatch<React.SetStateAction<() => void | Promise<void>>>
 }
 
-export const CheckoutAddresses: React.FC<Props> = ({
-  setAddress,
-  heading = 'Addresses',
-  description = 'Please select or add your shipping and billing addresses.',
-}) => {
+export const CheckoutAddresses: React.FC<Props> = ({ setAddress, heading, description }) => {
   const { addresses } = useAddresses()
+  const t = useTranslations('Checkout')
 
   if (!addresses || addresses.length === 0) {
     return (
-      <div>
-        <p>No addresses found. Please add an address.</p>
+      <div className="flex flex-col items-start gap-4">
+        <p className="text-ui-sm text-ink-muted">{t('sinDirecciones')}</p>
 
         <CreateAddressModal />
       </div>
@@ -40,10 +38,10 @@ export const CheckoutAddresses: React.FC<Props> = ({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col items-start gap-4">
       <div>
-        <h3 className="text-xl font-medium mb-2">{heading}</h3>
-        <p className="text-muted-foreground">{description}</p>
+        <h3 className="text-ui text-ink font-extrabold">{heading ?? t('direccionFacturacion')}</h3>
+        <p className="text-ui-sm text-ink-muted mt-1">{description ?? t('seleccionaDireccion')}</p>
       </div>
       <AddressesModal setAddress={setAddress} />
     </div>
@@ -52,6 +50,8 @@ export const CheckoutAddresses: React.FC<Props> = ({
 
 const AddressesModal: React.FC<Props> = ({ setAddress }) => {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('Checkout')
+
   const handleOpenChange = (state: boolean) => {
     setOpen(state)
   }
@@ -62,34 +62,42 @@ const AddressesModal: React.FC<Props> = ({ setAddress }) => {
   const { addresses } = useAddresses()
 
   if (!addresses || addresses.length === 0) {
-    return <p>No addresses found. Please add an address.</p>
+    return <p className="text-ui-sm text-ink-muted">{t('sinDirecciones')}</p>
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant={'outline'}>{'Select an address'}</Button>
+        <Button size="sm" variant={'outline'}>
+          {t('seleccionarDireccion')}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{'Select an address'}</DialogTitle>
+          <DialogTitle className="text-h2-sm text-ink font-extrabold">
+            {t('seleccionarDireccion')}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-12">
-          <ul className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8">
+          <ul className="flex flex-col gap-6">
             {addresses.map((address) => (
-              <li key={address.id} className="border-b pb-8 last:border-none">
+              <li
+                key={address.id}
+                className="border-hairline border-b pb-6 last:border-none last:pb-0"
+              >
                 <AddressItem
                   address={address}
                   beforeActions={
                     <Button
+                      size="sm"
                       onClick={(e) => {
                         e.preventDefault()
                         setAddress(address)
                         closeModal()
                       }}
                     >
-                      Select
+                      {t('seleccionar')}
                     </Button>
                   }
                 />

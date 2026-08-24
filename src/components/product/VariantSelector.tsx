@@ -102,7 +102,7 @@ export function VariantSelector({ product }: { product: Product }) {
 
                 return axis === 'color' ? (
                   <ColorSwatch
-                    color={colorHex(option.value.toLowerCase())}
+                    color={colorHex(option.value.toLowerCase(), option.hex)}
                     key={option.id}
                     name={option.label}
                     onClick={() => go(href)}

@@ -22,7 +22,10 @@ export const Pagination: React.FC<Props> = ({ buildHref, currentPage, totalPages
   return (
     <nav className="mt-11 flex justify-center gap-2">
       {hasPrev ? (
-        <Link className={cn(cell, 'border-control text-ink hover:border-ink border')} href={buildHref(currentPage - 1)}>
+        <Link
+          className={cn(cell, 'border-control text-ink hover:border-ink border')}
+          href={buildHref(currentPage - 1)}
+        >
           ‹
         </Link>
       ) : (
@@ -46,7 +49,10 @@ export const Pagination: React.FC<Props> = ({ buildHref, currentPage, totalPages
       )}
 
       {hasNext ? (
-        <Link className={cn(cell, 'border-control text-ink hover:border-ink border')} href={buildHref(currentPage + 1)}>
+        <Link
+          className={cn(cell, 'border-control text-ink hover:border-ink border')}
+          href={buildHref(currentPage + 1)}
+        >
           ›
         </Link>
       ) : (

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,6 +24,7 @@ export const CreateAccountForm: React.FC = () => {
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()
   const router = useRouter()
+  const t = useTranslations('Auth')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<null | string>(null)
 
@@ -47,8 +49,7 @@ export const CreateAccountForm: React.FC = () => {
       })
 
       if (!response.ok) {
-        const message = response.statusText || 'There was an error creating the account.'
-        setError(message)
+        setError(t('errorCrearCuenta'))
         return
       }
 
@@ -62,76 +63,70 @@ export const CreateAccountForm: React.FC = () => {
         await login(data)
         clearTimeout(timer)
         if (redirect) router.push(redirect)
-        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
+        else router.push('/account')
       } catch (_) {
         clearTimeout(timer)
-        setError('There was an error with the credentials provided. Please try again.')
+        setError(t('errorCredenciales'))
       }
     },
-    [login, router, searchParams],
+    [login, router, searchParams, t],
   )
 
   return (
-    <form className="max-w-lg py-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="prose dark:prose-invert mb-6">
-        <p>
-          {`This is where new customers can signup and create a new account. To manage all users, `}
-          <Link href="/admin/collections/users">login to the admin dashboard</Link>.
-        </p>
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {error && <Message className="mb-8" error={error} />}
 
-      <Message error={error} />
-
-      <div className="flex flex-col gap-8 mb-8">
+      <div className="mb-8 flex flex-col gap-6">
         <FormItem>
-          <Label htmlFor="email" className="mb-2">
-            Email Address
-          </Label>
+          <Label htmlFor="email">{t('correo')}</Label>
           <Input
             id="email"
-            {...register('email', { required: 'Email is required.' })}
+            autoComplete="email"
+            {...register('email', { required: t('correoRequerido') })}
             type="email"
           />
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="password" className="mb-2">
-            New password
-          </Label>
+          <Label htmlFor="password">{t('contrasena')}</Label>
           <Input
             id="password"
-            {...register('password', { required: 'Password is required.' })}
+            autoComplete="new-password"
+            {...register('password', { required: t('contrasenaRequerida') })}
             type="password"
           />
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="passwordConfirm" className="mb-2">
-            Confirm Password
-          </Label>
+          <Label htmlFor="passwordConfirm">{t('confirmarContrasena')}</Label>
           <Input
             id="passwordConfirm"
+            autoComplete="new-password"
             {...register('passwordConfirm', {
-              required: 'Please confirm your password.',
-              validate: (value) => value === password.current || 'The passwords do not match',
+              required: t('confirmaContrasena'),
+              validate: (value) => value === password.current || t('contrasenasNoCoinciden'),
             })}
             type="password"
           />
           {errors.passwordConfirm && <FormError message={errors.passwordConfirm.message} />}
         </FormItem>
       </div>
+
       <Button disabled={loading} type="submit" variant="default">
-        {loading ? 'Processing' : 'Create Account'}
+        {loading ? t('procesando') : t('registrarse')}
       </Button>
 
-      <div className="prose dark:prose-invert mt-8">
-        <p>
-          {'Already have an account? '}
-          <Link href={`/login${allParams}`}>Login</Link>
-        </p>
-      </div>
+      <p className="text-ui-sm text-ink-body mt-8">
+        {`${t('yaTienesCuenta')} `}
+        <Link
+          className="text-blue-brand border-gold border-b-2 font-semibold"
+          href={`/login${allParams}`}
+        >
+          {t('iniciarSesion')}
+        </Link>
+      </p>
     </form>
   )
 }

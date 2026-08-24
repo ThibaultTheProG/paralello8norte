@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { SectionHeading } from '@/components/p8'
 import { Button } from '@/components/ui/button'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { Link } from '@/i18n/navigation'
@@ -8,6 +9,7 @@ import configPromise from '@payload-config'
 import { AccountForm } from '@/components/forms/AccountForm'
 import { Order } from '@/payload-types'
 import { OrderItem } from '@/components/OrderItem'
+import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
 
@@ -15,13 +17,12 @@ export default async function AccountPage() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const t = await getTranslations('Cuenta')
 
   let orders: Order[] | null = null
 
   if (!user) {
-    redirect(
-      `/login?warning=${encodeURIComponent('Please login to access your account settings.')}`,
-    )
+    redirect(`/login?warning=${encodeURIComponent(t('debesIniciarSesion'))}`)
   }
 
   try {
@@ -48,28 +49,26 @@ export default async function AccountPage() {
 
   return (
     <>
-      <div className="border p-8 rounded-lg bg-primary-foreground">
-        <h1 className="text-3xl font-medium mb-8">Account settings</h1>
+      <section>
+        <SectionHeading className="mb-8" title={t('ajustesTitulo')} />
         <AccountForm />
-      </div>
+      </section>
 
-      <div className=" border p-8 rounded-lg bg-primary-foreground">
-        <h2 className="text-3xl font-medium mb-8">Recent Orders</h2>
-
-        <div className="prose dark:prose-invert mb-8">
-          <p>
-            These are the most recent orders you have placed. Each order is associated with an
-            payment. As you place more orders, they will appear in your orders list.
-          </p>
-        </div>
+      <section className="border-hairline border-t pt-10">
+        <SectionHeading
+          className="mb-6"
+          size="sm"
+          subtitle={t('pedidosRecientesTexto')}
+          title={t('pedidosRecientes')}
+        />
 
         {(!orders || !Array.isArray(orders) || orders?.length === 0) && (
-          <p className="mb-8">You have no orders.</p>
+          <p className="text-ui-sm text-ink-muted mb-8">{t('sinPedidos')}</p>
         )}
 
         {orders && orders.length > 0 && (
-          <ul className="flex flex-col gap-6 mb-8">
-            {orders?.map((order, index) => (
+          <ul className="mb-8 flex flex-col gap-4">
+            {orders?.map((order) => (
               <li key={order.id}>
                 <OrderItem order={order} />
               </li>
@@ -77,19 +76,23 @@ export default async function AccountPage() {
           </ul>
         )}
 
-        <Button asChild variant="default">
-          <Link href="/orders">View all orders</Link>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/orders">{t('verTodosLosPedidos')}</Link>
         </Button>
-      </div>
+      </section>
     </>
   )
 }
 
-export const metadata: Metadata = {
-  description: 'Create an account or log in to your existing account.',
-  openGraph: mergeOpenGraph({
-    title: 'Account',
-    url: '/account',
-  }),
-  title: 'Account',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Cuenta')
+
+  return {
+    description: t('ajustesTitulo'),
+    openGraph: mergeOpenGraph({
+      title: t('titulo'),
+      url: '/account',
+    }),
+    title: t('titulo'),
+  }
 }

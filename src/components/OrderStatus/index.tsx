@@ -1,24 +1,33 @@
 import { OrderStatus as StatusOptions } from '@/payload-types'
 import { cn } from '@/utilities/cn'
+import { useTranslations } from 'next-intl'
 
 type Props = {
-  status: StatusOptions
+  status: NonNullable<StatusOptions>
   className?: string
 }
 
+/**
+ * Statut de commande : même géométrie que le Badge du système (rayon 0,
+ * capitales interlettrées). Le doré reste un filet, d'où la variante `gold`
+ * en contour et non en aplat.
+ */
 export const OrderStatus: React.FC<Props> = ({ status, className }) => {
+  const t = useTranslations('Pedido')
+
   return (
-    <div
+    <span
       className={cn(
-        'text-xs tracking-widest font-mono uppercase py-0 px-2 rounded w-fit',
-        className,
+        'text-payment inline-block w-fit px-2 py-1 font-extrabold tracking-[1px] uppercase',
         {
-          'bg-primary/10': status === 'processing',
-          'bg-success': status === 'completed',
+          'border-gold text-gold border': status === 'processing',
+          'bg-blue-brand text-white': status === 'completed',
+          'border-control text-ink-body border': status !== 'processing' && status !== 'completed',
         },
+        className,
       )}
     >
-      {status}
-    </div>
+      {t(status)}
+    </span>
   )
 }

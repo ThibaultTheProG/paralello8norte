@@ -255,6 +255,9 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'EUR' | null;
+  printifyOrderId?: string | null;
+  printifyStatus?: ('pending' | 'submitted' | 'failed' | 'skipped') | null;
+  printifyError?: string | null;
   accessToken?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -317,6 +320,8 @@ export interface Product {
    */
   generateSlug?: boolean | null;
   slug: string;
+  printifyProductId?: string | null;
+  printifySyncedAt?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -329,6 +334,7 @@ export interface Product {
 export interface Media {
   id: number;
   alt: string;
+  printifySrc?: string | null;
   caption?: {
     root: {
       type: string;
@@ -369,6 +375,11 @@ export interface VariantOption {
    * should be defaulted or dynamic based on label
    */
   value: string;
+  /**
+   * Couleur de la pastille, en hexadécimal (#RRGGBB). Axe « color » uniquement.
+   */
+  hex?: string | null;
+  printifyOptionId?: number | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -989,6 +1000,8 @@ export interface Variant {
   inventory?: number | null;
   priceInEUREnabled?: boolean | null;
   priceInEUR?: number | null;
+  printifyVariantId?: number | null;
+  printifySku?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1546,6 +1559,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  printifySrc?: T;
   caption?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1739,6 +1753,8 @@ export interface VariantsSelect<T extends boolean = true> {
   inventory?: T;
   priceInEUREnabled?: T;
   priceInEUR?: T;
+  printifyVariantId?: T;
+  printifySku?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1765,6 +1781,8 @@ export interface VariantOptionsSelect<T extends boolean = true> {
   variantType?: T;
   label?: T;
   value?: T;
+  hex?: T;
+  printifyOptionId?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1810,6 +1828,8 @@ export interface ProductsSelect<T extends boolean = true> {
   categories?: T;
   generateSlug?: T;
   slug?: T;
+  printifyProductId?: T;
+  printifySyncedAt?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1871,6 +1891,9 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  printifyOrderId?: T;
+  printifyStatus?: T;
+  printifyError?: T;
   accessToken?: T;
   updatedAt?: T;
   createdAt?: T;

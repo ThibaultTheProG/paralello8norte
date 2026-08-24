@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { deepMergeSimple } from 'payload/shared'
 import { FormError } from '@/components/forms/FormError'
 import { FormItem } from '@/components/forms/FormItem'
+import { useTranslations } from 'next-intl'
 
 type AddressFormValues = {
   title?: string | null
@@ -50,6 +51,8 @@ export const AddressForm: React.FC<Props> = ({
   callback,
   skipSubmission,
 }) => {
+  const t = useTranslations('Direccion')
+
   const {
     register,
     handleSubmit,
@@ -85,7 +88,7 @@ export const AddressForm: React.FC<Props> = ({
       <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-col md:flex-row gap-4">
           <FormItem className="shrink">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('tratamiento')}</Label>
 
             <Select
               {...register('title')}
@@ -95,7 +98,7 @@ export const AddressForm: React.FC<Props> = ({
               defaultValue={initialData?.title || ''}
             >
               <SelectTrigger id="title">
-                <SelectValue placeholder="Title" />
+                <SelectValue placeholder={t('tratamiento')} />
               </SelectTrigger>
               <SelectContent>
                 {titles.map((title) => (
@@ -109,85 +112,82 @@ export const AddressForm: React.FC<Props> = ({
           </FormItem>
 
           <FormItem>
-            <Label htmlFor="firstName">First name*</Label>
+            <Label htmlFor="firstName">{`${t('nombre')}*`}</Label>
             <Input
               id="firstName"
               autoComplete="given-name"
-              {...register('firstName', { required: 'First name is required.' })}
+              {...register('firstName', { required: t('requerido') })}
             />
             {errors.firstName && <FormError message={errors.firstName.message} />}
           </FormItem>
 
           <FormItem>
-            <Label htmlFor="lastName">Last name*</Label>
+            <Label htmlFor="lastName">{`${t('apellidos')}*`}</Label>
             <Input
               autoComplete="family-name"
               id="lastName"
-              {...register('lastName', { required: 'Last name is required.' })}
+              {...register('lastName', { required: t('requerido') })}
             />
             {errors.lastName && <FormError message={errors.lastName.message} />}
           </FormItem>
         </div>
 
         <FormItem>
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t('telefono')}</Label>
           <Input type="tel" id="phone" autoComplete="mobile tel" {...register('phone')} />
           {errors.phone && <FormError message={errors.phone.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="company">Company</Label>
+          <Label htmlFor="company">{t('empresa')}</Label>
           <Input id="company" autoComplete="organization" {...register('company')} />
           {errors.company && <FormError message={errors.company.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="addressLine1">Address line 1*</Label>
+          <Label htmlFor="addressLine1">{`${t('linea1')}*`}</Label>
           <Input
             id="addressLine1"
             autoComplete="address-line1"
-            {...register('addressLine1', { required: 'Address line 1 is required.' })}
+            {...register('addressLine1', { required: t('requerido') })}
           />
           {errors.addressLine1 && <FormError message={errors.addressLine1.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="addressLine2">Address line 2</Label>
+          <Label htmlFor="addressLine2">{t('linea2')}</Label>
           <Input id="addressLine2" autoComplete="address-line2" {...register('addressLine2')} />
           {errors.addressLine2 && <FormError message={errors.addressLine2.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="city">City*</Label>
+          <Label htmlFor="city">{`${t('ciudad')}*`}</Label>
           <Input
             id="city"
             autoComplete="address-level2"
-            {...register('city', { required: 'City is required.' })}
+            {...register('city', { required: t('requerido') })}
           />
           {errors.city && <FormError message={errors.city.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="state">State</Label>
+          <Label htmlFor="state">{t('provincia')}</Label>
           <Input id="state" autoComplete="address-level1" {...register('state')} />
           {errors.state && <FormError message={errors.state.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="postalCode">Zip Code*</Label>
-          <Input
-            id="postalCode"
-            {...register('postalCode', { required: 'Postal code is required.' })}
-          />
+          <Label htmlFor="postalCode">{`${t('codigoPostal')}*`}</Label>
+          <Input id="postalCode" {...register('postalCode', { required: t('requerido') })} />
           {errors.postalCode && <FormError message={errors.postalCode.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="country">Country*</Label>
+          <Label htmlFor="country">{`${t('pais')}*`}</Label>
 
           <Select
             {...register('country', {
-              required: 'Country is required.',
+              required: t('requerido'),
             })}
             onValueChange={(value) => {
               setValue('country', value, { shouldValidate: true })
@@ -196,7 +196,7 @@ export const AddressForm: React.FC<Props> = ({
             defaultValue={initialData?.country || ''}
           >
             <SelectTrigger id="country" className="w-full">
-              <SelectValue placeholder="Country" />
+              <SelectValue placeholder={t('pais')} />
             </SelectTrigger>
             <SelectContent>
               {supportedCountries.map((country) => {
@@ -220,7 +220,7 @@ export const AddressForm: React.FC<Props> = ({
         </FormItem>
       </div>
 
-      <Button type="submit">Submit</Button>
+      <Button type="submit">{t('guardar')}</Button>
     </form>
   )
 }

@@ -14,6 +14,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { OrderStatus } from '@/components/OrderStatus'
 import { AddressItem } from '@/components/addresses/AddressItem'
+import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +27,7 @@ export default async function Order({ params, searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const t = await getTranslations('Pedido')
 
   const { id } = await params
   const { email = '', accessToken = '' } = await searchParams
@@ -113,53 +115,61 @@ export default async function Order({ params, searchParams }: PageProps) {
   }
 
   return (
-    <div className="">
-      <div className="flex gap-8 justify-between items-center mb-6">
+    <div className="w-full">
+      <div className="mb-8 flex items-center justify-between gap-8">
         {user ? (
-          <div className="flex gap-4">
-            <Button asChild variant="ghost">
-              <Link href="/orders">
-                <ChevronLeftIcon />
-                All orders
-              </Link>
-            </Button>
-          </div>
+          <Button asChild size="sm" variant="ghost" className="-ml-4">
+            <Link href="/orders">
+              <ChevronLeftIcon strokeWidth={1.8} />
+              {t('todosLosPedidos')}
+            </Link>
+          </Button>
         ) : (
-          <div></div>
+          <div />
         )}
 
-        <h1 className="text-sm uppercase font-mono px-2 bg-primary/10 rounded tracking-[0.07em]">
-          <span className="">{`Order #${order.id}`}</span>
+        <h1 className="text-meta text-ink-muted m-0 font-bold tracking-[1px] uppercase">
+          {`${t('numero')} ${order.id}`}
         </h1>
       </div>
 
-      <div className="bg-card border rounded-lg px-6 py-4 flex flex-col gap-12">
+      <div className="border-hairline flex flex-col gap-10 border p-6 md:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
-          <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Order Date</p>
-            <p className="text-lg">
+          <div>
+            <p className="text-meta text-ink-muted mb-1 font-bold tracking-[1px] uppercase">
+              {t('fecha')}
+            </p>
+            <p className="text-ui text-ink font-semibold">
               <time dateTime={order.createdAt}>
-                {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
+                {formatDateTime({ date: order.createdAt, format: 'dd/MM/yyyy' })}
               </time>
             </p>
           </div>
 
-          <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Total</p>
-            {order.amount && <Price className="text-lg" amount={order.amount} />}
+          <div>
+            <p className="text-meta text-ink-muted mb-1 font-bold tracking-[1px] uppercase">
+              {t('total')}
+            </p>
+            {order.amount && (
+              <Price className="text-price text-ink font-extrabold" amount={order.amount} />
+            )}
           </div>
 
           {order.status && (
-            <div className="grow max-w-1/3">
-              <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Status</p>
-              <OrderStatus className="text-sm" status={order.status} />
+            <div>
+              <p className="text-meta text-ink-muted mb-1 font-bold tracking-[1px] uppercase">
+                {t('estado')}
+              </p>
+              <OrderStatus status={order.status} />
             </div>
           )}
         </div>
 
         {order.items && (
-          <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Items</h2>
+          <div className="border-hairline border-t pt-8">
+            <h2 className="text-meta text-ink-muted mb-5 font-bold tracking-[1px] uppercase">
+              {t('articulos')}
+            </h2>
             <ul className="flex flex-col gap-6">
               {order.items?.map((item, index) => {
                 if (typeof item.product === 'string') {
@@ -167,7 +177,11 @@ export default async function Order({ params, searchParams }: PageProps) {
                 }
 
                 if (!item.product || typeof item.product !== 'object') {
-                  return <div key={index}>This item is no longer available.</div>
+                  return (
+                    <li className="text-ui-sm text-ink-muted" key={index}>
+                      {t('yaNoDisponible')}
+                    </li>
+                  )
                 }
 
                 const variant =
@@ -188,8 +202,10 @@ export default async function Order({ params, searchParams }: PageProps) {
         )}
 
         {order.shippingAddress && (
-          <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Shipping Address</h2>
+          <div className="border-hairline border-t pt-8">
+            <h2 className="text-meta text-ink-muted mb-4 font-bold tracking-[1px] uppercase">
+              {t('direccionEnvio')}
+            </h2>
 
             {/* @ts-expect-error - some kind of type hell */}
             <AddressItem address={order.shippingAddress} hideActions />
@@ -202,13 +218,15 @@ export default async function Order({ params, searchParams }: PageProps) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
+  const t = await getTranslations('Pedido')
+  const title = `${t('numero')} ${id}`
 
   return {
-    description: `Order details for order ${id}.`,
+    description: title,
     openGraph: mergeOpenGraph({
-      title: `Order ${id}`,
+      title,
       url: `/orders/${id}`,
     }),
-    title: `Order ${id}`,
+    title,
   }
 }

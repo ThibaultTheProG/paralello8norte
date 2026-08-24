@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,6 +24,7 @@ export const LoginForm: React.FC = () => {
   const redirect = useRef(searchParams.get('redirect'))
   const { login } = useAuth()
   const router = useRouter()
+  const t = useTranslations('Auth')
   const [error, setError] = React.useState<null | string>(null)
 
   const {
@@ -38,52 +40,53 @@ export const LoginForm: React.FC = () => {
         if (redirect?.current) router.push(redirect.current)
         else router.push('/account')
       } catch (_) {
-        setError('There was an error with the credentials provided. Please try again.')
+        setError(t('errorCredenciales'))
       }
     },
-    [login, router],
+    [login, router, t],
   )
 
   return (
-    <form className="" onSubmit={handleSubmit(onSubmit)}>
-      <Message className="classes.message" error={error} />
-      <div className="flex flex-col gap-8">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {error && <Message className="mb-8" error={error} />}
+
+      <div className="mb-8 flex flex-col gap-6">
         <FormItem>
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('correo')}</Label>
           <Input
             id="email"
             type="email"
-            {...register('email', { required: 'Email is required.' })}
+            autoComplete="email"
+            {...register('email', { required: t('correoRequerido') })}
           />
           {errors.email && <FormError message={errors.email.message} />}
         </FormItem>
 
         <FormItem>
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('contrasena')}</Label>
           <Input
             id="password"
             type="password"
-            {...register('password', { required: 'Please provide a password.' })}
+            autoComplete="current-password"
+            {...register('password', { required: t('contrasenaRequerida') })}
           />
           {errors.password && <FormError message={errors.password.message} />}
         </FormItem>
 
-        <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
-          <p>
-            Forgot your password?{' '}
-            <Link href={`/forgot-password${allParams}`}>Click here to reset it</Link>
-          </p>
-        </div>
+        <Link
+          className="text-ui-sm text-blue-brand border-gold self-start border-b-2 font-semibold"
+          href={`/forgot-password${allParams}`}
+        >
+          {t('olvidasteContrasena')}
+        </Link>
       </div>
 
-      <div className="flex gap-4 justify-between">
-        <Button asChild variant="outline" size="lg">
-          <Link href={`/create-account${allParams}`} className="grow max-w-[50%]">
-            Create an account
-          </Link>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <Button className="grow" disabled={isLoading} type="submit" variant="default">
+          {isLoading ? t('procesando') : t('entrar')}
         </Button>
-        <Button className="grow" disabled={isLoading} size="lg" type="submit" variant="default">
-          {isLoading ? 'Processing' : 'Continue'}
+        <Button asChild className="grow" variant="outline">
+          <Link href={`/create-account${allParams}`}>{t('crearCuenta')}</Link>
         </Button>
       </div>
     </form>

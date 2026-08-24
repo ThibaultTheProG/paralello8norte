@@ -17,4 +17,18 @@ export const COLOR_HEX: Record<string, string> = {
 /** Réserve neutre : une couleur inconnue ne doit pas casser la rangée de pastilles. */
 export const FALLBACK_COLOR = '#E9F0F4'
 
-export const colorHex = (value: string): string => COLOR_HEX[value] ?? FALLBACK_COLOR
+const HEX = /^#[0-9a-f]{3,8}$/i
+
+/**
+ * Hex de la pastille.
+ *
+ * Le catalogue Printify apporte bien plus que les cinq couleurs du design
+ * system, et il fournit lui-même le hex de chaque coloris : la synchro le range
+ * dans `variantOptions.hex`, qui fait donc autorité. Le tableau ci-dessus reste
+ * le repli pour les options saisies à la main dans l'admin.
+ */
+export const colorHex = (value: string, stored?: null | string): string => {
+  if (stored && HEX.test(stored.trim())) return stored.trim()
+
+  return COLOR_HEX[value] ?? FALLBACK_COLOR
+}

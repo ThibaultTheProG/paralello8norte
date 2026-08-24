@@ -1,5 +1,6 @@
 'use client'
 
+import { ImagePlaceholder, Rule, SectionHeading } from '@/components/p8'
 import { Media } from '@/components/Media'
 import { Message } from '@/components/Message'
 import { Price } from '@/components/Price'
@@ -10,6 +11,7 @@ import { useAuth } from '@/providers/Auth'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import { Link } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import React, { Suspense, useCallback, useEffect, useState } from 'react'
 
@@ -36,6 +38,8 @@ export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
   const { cart } = useCart()
+  const t = useTranslations('Checkout')
+  const tc = useTranslations('Carrito')
   const [error, setError] = useState<null | string>(null)
   /**
    * State to manage the email input for guest checkout.
@@ -94,27 +98,25 @@ export const CheckoutPage: React.FC = () => {
         }
       } catch (error) {
         const errorData = error instanceof Error ? JSON.parse(error.message) : {}
-        let errorMessage = 'An error occurred while initiating payment.'
+        let errorMessage = t('errorPago')
 
         if (errorData?.cause?.code === 'OutOfStock') {
-          errorMessage = 'One or more items in your cart are out of stock.'
+          errorMessage = t('errorSinStock')
         }
 
         setError(errorMessage)
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, shippingAddress],
+    [billingAddress, billingAddressSameAsShipping, shippingAddress, email, initiatePayment, t],
   )
 
   if (!stripe) return null
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
-      <div className="py-12 w-full items-center justify-center">
-        <div className="prose dark:prose-invert text-center max-w-none self-center mb-8">
-          <p>Processing your payment...</p>
-        </div>
+      <div className="w-full py-16 text-center">
+        <p className="text-ui text-ink-muted mb-8">{t('procesando')}</p>
         <LoadingSpinner />
       </div>
     )
@@ -122,49 +124,51 @@ export const CheckoutPage: React.FC = () => {
 
   if (cartIsEmpty) {
     return (
-      <div className="prose dark:prose-invert py-12 w-full items-center">
-        <p>Your cart is empty.</p>
-        <Link href="/search">Continue shopping?</Link>
+      <div className="flex w-full flex-col items-start gap-5 py-16">
+        <Rule />
+        <p className="text-h2-sm text-ink font-extrabold">{t('carritoVacio')}</p>
+        <Button asChild size="sm" variant="outline">
+          <Link href="/catalogo">{t('verCatalogo')}</Link>
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col items-stretch justify-stretch my-8 md:flex-row grow gap-10 md:gap-6 lg:gap-8">
-      <div className="basis-full lg:basis-2/3 flex flex-col gap-8 justify-stretch">
-        <h2 className="font-medium text-3xl">Contact</h2>
-        {!user && (
-          <div className=" bg-accent dark:bg-black rounded-lg p-4 w-full flex items-center">
-            <div className="prose dark:prose-invert">
-              <Button asChild className="no-underline text-inherit" variant="outline">
-                <Link href="/login">Log in</Link>
-              </Button>
-              <p className="mt-0">
-                <span className="mx-2">or</span>
-                <Link href="/create-account">create an account</Link>
-              </p>
-            </div>
-          </div>
-        )}
+    <div className="my-10 flex grow flex-col items-stretch justify-stretch gap-12 md:flex-row md:gap-10 lg:gap-16">
+      <div className="flex basis-full flex-col justify-stretch gap-8 lg:basis-2/3">
+        <SectionHeading size="sm" title={t('contacto')} />
+
         {user ? (
-          <div className="bg-accent dark:bg-card rounded-lg p-4 ">
-            <div>
-              <p>{user.email}</p>{' '}
-              <p>
-                Not you?{' '}
-                <Link className="underline" href="/logout">
-                  Log out
-                </Link>
-              </p>
-            </div>
+          <div className="border-hairline text-ui-sm text-ink-body border p-5">
+            <p className="text-ink font-semibold">{user.email}</p>
+            <p className="mt-1">
+              {`${t('noEresTu')} `}
+              <Link className="text-blue-brand border-gold border-b-2 font-semibold" href="/logout">
+                {t('cerrarSesion')}
+              </Link>
+            </p>
           </div>
         ) : (
-          <div className="bg-accent dark:bg-black rounded-lg p-4 ">
-            <div>
-              <p className="mb-4">Enter your email to checkout as a guest.</p>
+          <div className="flex flex-col gap-6">
+            <div className="border-hairline flex flex-wrap items-center gap-3 border p-5">
+              <Button asChild size="sm" variant="outline">
+                <Link href="/login">{t('iniciarSesion')}</Link>
+              </Button>
+              <span className="text-ui-sm text-ink-muted">{t('o')}</span>
+              <Link
+                className="text-ui-sm text-blue-brand border-gold border-b-2 font-semibold"
+                href="/create-account"
+              >
+                {t('crearCuenta')}
+              </Link>
+            </div>
 
-              <FormItem className="mb-6">
-                <Label htmlFor="email">Email Address</Label>
+            <div className="border-hairline border p-5">
+              <p className="text-ui-sm text-ink-body mb-4">{t('comoInvitado')}</p>
+
+              <FormItem className="mb-5 max-w-sm">
+                <Label htmlFor="email">{t('correo')}</Label>
                 <Input
                   disabled={!emailEditable}
                   id="email"
@@ -181,21 +185,23 @@ export const CheckoutPage: React.FC = () => {
                   e.preventDefault()
                   setEmailEditable(false)
                 }}
-                variant="default"
+                size="sm"
+                variant="invert"
               >
-                Continue as guest
+                {t('continuarComoInvitado')}
               </Button>
             </div>
           </div>
         )}
 
-        <h2 className="font-medium text-3xl">Address</h2>
+        <SectionHeading size="sm" title={t('direccion')} />
 
         {billingAddress ? (
-          <div>
+          <div className="border-hairline border p-5">
             <AddressItem
               actions={
                 <Button
+                  size="sm"
                   variant={'outline'}
                   disabled={Boolean(paymentData)}
                   onClick={(e) => {
@@ -203,14 +209,14 @@ export const CheckoutPage: React.FC = () => {
                     setBillingAddress(undefined)
                   }}
                 >
-                  Remove
+                  {t('quitar')}
                 </Button>
               }
               address={billingAddress}
             />
           </div>
         ) : user ? (
-          <CheckoutAddresses heading="Billing address" setAddress={setBillingAddress} />
+          <CheckoutAddresses heading={t('direccionFacturacion')} setAddress={setBillingAddress} />
         ) : (
           <CreateAddressModal
             disabled={!email || Boolean(emailEditable)}
@@ -221,7 +227,7 @@ export const CheckoutPage: React.FC = () => {
           />
         )}
 
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-3">
           <Checkbox
             id="shippingTheSameAsBilling"
             checked={billingAddressSameAsShipping}
@@ -230,16 +236,19 @@ export const CheckoutPage: React.FC = () => {
               setBillingAddressSameAsShipping(state as boolean)
             }}
           />
-          <Label htmlFor="shippingTheSameAsBilling">Shipping is the same as billing</Label>
+          <Label className="font-medium normal-case" htmlFor="shippingTheSameAsBilling">
+            {t('mismaDireccionFacturacion')}
+          </Label>
         </div>
 
         {!billingAddressSameAsShipping && (
           <>
             {shippingAddress ? (
-              <div>
+              <div className="border-hairline border p-5">
                 <AddressItem
                   actions={
                     <Button
+                      size="sm"
                       variant={'outline'}
                       disabled={Boolean(paymentData)}
                       onClick={(e) => {
@@ -247,7 +256,7 @@ export const CheckoutPage: React.FC = () => {
                         setShippingAddress(undefined)
                       }}
                     >
-                      Remove
+                      {t('quitar')}
                     </Button>
                   }
                   address={shippingAddress}
@@ -255,8 +264,8 @@ export const CheckoutPage: React.FC = () => {
               </div>
             ) : user ? (
               <CheckoutAddresses
-                heading="Shipping address"
-                description="Please select a shipping address."
+                heading={t('direccionEnvio')}
+                description={t('seleccionaDireccionEnvio')}
                 setAddress={setShippingAddress}
               />
             ) : (
@@ -280,12 +289,12 @@ export const CheckoutPage: React.FC = () => {
               void initiatePaymentIntent('stripe')
             }}
           >
-            Go to payment
+            {t('irAlPago')}
           </Button>
         )}
 
         {!paymentData?.['clientSecret'] && error && (
-          <div className="my-8">
+          <div className="flex flex-col items-start gap-4">
             <Message error={error} />
 
             <Button
@@ -293,19 +302,19 @@ export const CheckoutPage: React.FC = () => {
                 e.preventDefault()
                 router.refresh()
               }}
-              variant="default"
+              size="sm"
+              variant="outline"
             >
-              Try again
+              {t('irAlPago')}
             </Button>
           </div>
         )}
 
         <Suspense fallback={<React.Fragment />}>
-          {/* @ts-ignore */}
-          {paymentData && paymentData?.['clientSecret'] && (
-            <div className="pb-16">
-              <h2 className="font-medium text-3xl">Payment</h2>
-              {error && <p>{`Error: ${error}`}</p>}
+          {paymentData && Boolean(paymentData['clientSecret']) && (
+            <div className="flex flex-col gap-8 pb-16">
+              <SectionHeading size="sm" title={t('pago')} />
+              {error && <Message error={error} />}
               <Elements
                 options={{
                   appearance: {
@@ -344,7 +353,7 @@ export const CheckoutPage: React.FC = () => {
                     className="self-start"
                     onClick={() => setPaymentData(null)}
                   >
-                    Cancel payment
+                    {t('cancelarPago')}
                   </Button>
                 </div>
               </Elements>
@@ -354,13 +363,17 @@ export const CheckoutPage: React.FC = () => {
       </div>
 
       {!cartIsEmpty && (
-        <div className="basis-full lg:basis-1/3 lg:pl-8 p-8 border-none bg-primary/5 flex flex-col gap-8 rounded-lg">
-          <h2 className="text-3xl font-medium">Your cart</h2>
+        <aside className="bg-sand flex h-fit basis-full flex-col gap-6 p-6 lg:basis-1/3 lg:p-8">
+          <div>
+            <Rule />
+            <h2 className="text-h2-sm text-ink m-0 font-extrabold">{t('resumen')}</h2>
+          </div>
+
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object' && item.product) {
               const {
                 product,
-                product: { id, meta, title, gallery },
+                product: { meta, title, gallery },
                 quantity,
                 variant,
               } = item
@@ -397,45 +410,56 @@ export const CheckoutPage: React.FC = () => {
 
               return (
                 <div className="flex items-start gap-4" key={index}>
-                  <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
-                    <div className="relative w-full h-full">
-                      {image && typeof image !== 'string' && (
-                        <Media className="" fill imgClassName="rounded-lg" resource={image} />
-                      )}
-                    </div>
+                  <div className="border-hairline relative size-16 shrink-0 border bg-white">
+                    {image && typeof image !== 'string' ? (
+                      <Media fill imgClassName="object-cover" resource={image} />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
                   </div>
-                  <div className="flex grow justify-between items-center">
-                    <div className="flex flex-col gap-1">
-                      <p className="font-medium text-lg">{title}</p>
+
+                  <div className="flex grow items-start justify-between gap-3">
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-ui-sm text-ink font-semibold">{title}</p>
                       {variant && typeof variant === 'object' && (
-                        <p className="text-sm font-mono text-primary/50 tracking-widest">
+                        <p className="text-meta text-ink-muted">
                           {variant.options
-                            ?.map((option: VariantOptionRef) => {
-                              if (typeof option === 'object') return option.label
-                              return null
-                            })
-                            .join(', ')}
+                            ?.map((option: VariantOptionRef) =>
+                              typeof option === 'object' ? option.label : null,
+                            )
+                            .filter(Boolean)
+                            .join(' · ')}
                         </p>
                       )}
-                      <div>
-                        {'x'}
-                        {quantity}
-                      </div>
+                      <p className="text-meta text-ink-muted">{`× ${quantity}`}</p>
                     </div>
 
-                    {typeof price === 'number' && <Price amount={price} />}
+                    {typeof price === 'number' && (
+                      <Price
+                        amount={price * quantity}
+                        className="text-ui-sm text-ink font-extrabold"
+                      />
+                    )}
                   </div>
                 </div>
               )
             }
             return null
           })}
-          <hr />
-          <div className="flex justify-between items-center gap-2">
-            <span className="uppercase">Total</span>{' '}
-            <Price className="text-3xl font-medium" amount={cart.subtotal || 0} />
+
+          <div className="border-control border-t pt-5">
+            <div className="text-meta text-ink-muted mb-3 flex items-center justify-between">
+              <span>{tc('envio')}</span>
+              <span>{tc('envioCalculado')}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-meta text-ink font-bold tracking-[1px] uppercase">
+                {tc('total')}
+              </span>
+              <Price className="text-price text-ink font-extrabold" amount={cart.subtotal || 0} />
+            </div>
           </div>
-        </div>
+        </aside>
       )}
     </div>
   )
