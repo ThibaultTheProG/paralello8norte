@@ -1,7 +1,7 @@
 import type { Media as MediaType, Product } from '@/payload-types'
 
-import { Media } from '@/components/Media'
 import { ImagePlaceholder } from '@/components/p8'
+import { GalleryCarousel } from './GalleryCarousel'
 import { getTranslations } from 'next-intl/server'
 import React from 'react'
 
@@ -10,7 +10,11 @@ type Props = {
   title: string
 }
 
-/** Le carrousel du template est remplacé par la colonne empilée de la maquette : trois visuels 4/5 qui défilent contre la colonne d'achat restée fixe. */
+/**
+ * Colonne visuelle de la fiche produit : un carrousel 4/5 face à la colonne
+ * d'achat. Faute de photo, on empile les réserves prescrites par le design
+ * system plutôt que de faire défiler du vide.
+ */
 const PLACEHOLDER_COUNT = 3
 
 export const Gallery: React.FC<Props> = async ({ gallery, title }) => {
@@ -33,18 +37,13 @@ export const Gallery: React.FC<Props> = async ({ gallery, title }) => {
   }
 
   return (
-    <div className="flex flex-col gap-[18px]">
-      {images.map((image, index) => (
-        <div className="relative aspect-[4/5] w-full overflow-hidden" key={image.id}>
-          <Media
-            className="h-full w-full"
-            fill
-            imgClassName="object-cover"
-            priority={index === 0}
-            resource={image}
-          />
-        </div>
-      ))}
-    </div>
+    <GalleryCarousel
+      images={images}
+      labels={{
+        anterior: t('imagenAnterior'),
+        siguiente: t('imagenSiguiente'),
+        verImagen: t('verImagen'),
+      }}
+    />
   )
 }

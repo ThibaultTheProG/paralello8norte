@@ -234,7 +234,10 @@
     "irAlInicio": "Ir al inicio",
     "imagenPendiente": "FOTO PENDIENTE",
     "errorTitulo": "Se nos cayó algo",
-    "errorTexto": "Hubo un problema en la tienda. Suele ser pasajero: inténtalo otra vez."
+    "errorTexto": "Hubo un problema en la tienda. Suele ser pasajero: inténtalo otra vez.",
+    "imagenAnterior": "Imagen anterior",
+    "imagenSiguiente": "Imagen siguiente",
+    "verImagen": "Ver imagen"
   },
   "Pedido": {
     "titulo": "Pedido",

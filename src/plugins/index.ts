@@ -22,6 +22,7 @@ import {
   printifyVariantOptionFields,
 } from '@/collections/printify/fields'
 import { submitOrderToPrintifyHook } from '@/collections/printify/submitOrderHook'
+import { r2StoragePlugins } from '@/lib/storage/r2'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -163,4 +164,5 @@ export const plugins: Plugin[] = [
       },
     },
   }),
+  ...r2StoragePlugins(),
 ]

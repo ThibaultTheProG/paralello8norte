@@ -24,14 +24,20 @@ const nextConfig: NextConfig = {
     ],
     qualities: [90, 100],
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
-        const url = new URL(item)
+      ...[
+        NEXT_PUBLIC_SERVER_URL,
+        // Domaine public du bucket R2 : c'est lui qui sert les médias en prod.
+        process.env.CLOUDFLARE_R2_PUBLIC_URL,
+      ]
+        .filter((item): item is string => Boolean(item))
+        .map((item) => {
+          const url = new URL(item)
 
-        return {
-          hostname: url.hostname,
-          protocol: url.protocol.replace(':', '') as 'http' | 'https',
-        }
-      }),
+          return {
+            hostname: url.hostname,
+            protocol: url.protocol.replace(':', '') as 'http' | 'https',
+          }
+        }),
     ],
   },
   reactStrictMode: true,
